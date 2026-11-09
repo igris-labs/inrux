@@ -42,6 +42,8 @@ Open `App.iru`, verify language mode **Inrux**, then:
 
 - Format Document formats view, Rust and CSS together. You can enable editor format-on-save.
 - Lowercase tags and PascalCase components have separate theme-aware token categories.
+- `.iru` files use the Inrux brand mark in light/dark variants, unless your file-icon theme overrides language icons.
+- Type a tag/attribute or press Ctrl+Space for component, prop, event and model suggestions. Imported components expose public Rust `Props` types and doc comments, including unsaved changes. Markup completion/navigation do not require a generated build graph.
 - Ctrl/Cmd-click or F12 on imported component tags opens the corresponding `.iru` source.
 - `<rust>` uses Rust highlighting and source-mapped completion, hover, definitions and signature help through the installed rust-analyzer extension.
 - Compiler syntax diagnostics and available mapped Rust diagnostics appear in Problems.

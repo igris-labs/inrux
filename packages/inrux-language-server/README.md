@@ -17,6 +17,7 @@ The VS Code setting is `inrux.server.path`. Configure an executable path, not a 
 ## Current capabilities
 
 - Full document synchronization, including unsaved text.
+- `inrux/documentInfo`: compiler-owned block/import metadata, built-in accepted attributes, and typed public Props fields/doc comments/ranges for the VS Code completion/navigation providers.
 - Diagnostics for view/block/Rust/style syntax and missing explicit component imports.
 - Original byte spans converted into zero-based LSP UTF-16 ranges.
 - Diagnostics cleared on correction and document close.

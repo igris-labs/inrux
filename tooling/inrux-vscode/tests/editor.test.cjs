@@ -68,3 +68,35 @@ test("TextMate distinguishes lowercase tags, PascalCase components and embedded 
   scopes("<style scoped>", 2);
   assert(scopes(".card { color: #ffffff; }", 9).includes("source.css"));
 });
+
+const { completionContext } = require("../out/editor/completion-context");
+
+test("navigation scanner retains complete tags before and after an unfinished tag", () => {
+  const tags = viewTags(
+    '<Column><Example title="ok" /><Input placeholder={',
+    true,
+  );
+  assert.deepEqual(
+    tags.map((t) => t.text),
+    ["<Column>", '<Example title="ok" />', "<Input placeholder={"],
+  );
+  assert.throws(() => viewTags("<Column><Input placeholder={"));
+});
+
+test("markup completion distinguishes names, attributes and Rust/string/comment values", () => {
+  const at = (text) => completionContext(text, text.length);
+  assert.equal(at("<Bu").prefix, "Bu");
+  assert.equal(at("</Ex").closing, true);
+  assert.equal(at("<Button ").tag, "Button");
+  assert.equal(at("<Input model:").prefix, "model:");
+  assert.equal(at("<Button @cl").prefix, "@cl");
+  assert.equal(at("<Example :ti").prefix, ":ti");
+  assert.equal(at('<Button text="literal <Fake '), undefined);
+  assert.equal(at('<Text text={format!("<Fake {}>", x) '), undefined);
+  assert.equal(at("<!-- <Fake "), undefined);
+  assert.deepEqual(
+    at('<Text text={if a > 0 { r#"}"# } else { "x" }} class').attributes,
+    ["text"],
+  );
+  assert.deepEqual(at('<Text text="ok" ').attributes, ["text"]);
+});

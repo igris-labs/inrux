@@ -1,6 +1,6 @@
 # Inrux for VS Code
 
-`.iru` single-file component editing: syntax highlighting, full-document formatting, component Ctrl/Cmd-click, compiler diagnostics and source-mapped Rust language features. Runtime/framework code remains Rust; this package is the editor integration.
+`.iru` single-file component editing: syntax highlighting, full-document formatting, component/prop IntelliSense, component Ctrl/Cmd-click, compiler diagnostics and source-mapped Rust language features. Runtime/framework code remains Rust; this package is the editor integration.
 
 ## Install from this checkout
 
@@ -37,8 +37,10 @@ Open `App.iru` with language mode **Inrux** in a trusted Cargo workspace. The ex
 | Feature | Behavior |
 | --- | --- |
 | Highlighting | Lowercase tags use tag/keyword scopes; PascalCase components use class/type scopes, with theme-aware semantic tokens. Attributes, strings, triggers, Rust expressions and embedded CSS have their own scopes. Exact colors follow the active theme. |
+| Component IntelliSense | Built-in tags/accepted attributes come from compiler validation metadata. Explicitly imported `.iru` components expose public `Props` fields, Rust types/doc comments, `Emit` events and paired model bindings. Unsaved child edits are included; no prior Cargo build is required for markup completion/navigation. Use Ctrl+Space for manual suggestions. |
+| File icons | `.iru` files use light/dark Inrux brand marks. VS Code may let the selected file-icon theme override language icons; see [language icon behavior](https://code.visualstudio.com/api/extension-guides/file-icon-theme). |
 | Rust block | Uses the Rust grammar. Cargo-backed completion, hover, signature help and definitions forward to the installed rust-analyzer and map authored Rust ranges back to `.iru`. |
-| Component navigation | Ctrl/Cmd-click or F12 on opening/closing component names follows explicit grouped/aliased Rust imports to the corresponding `.iru` file. No guessing imports from a global component registry. |
+| Component navigation | Ctrl/Cmd-click or F12 on opening/closing component names follows explicit grouped/aliased Rust imports to the corresponding `.iru` file. Works on complete opening/closing tags while later markup is unfinished, and on imported alias declarations. No guessing imports from a global component registry. |
 | Formatting | Reindents view tags while preserving attribute/expression/literal bytes; delegates Rust to rustfmt and CSS to VS Code's built-in CSS formatter. The result is one atomic edit; formatting again should produce no change. |
 | Problems | The Rust language server supplies original-source framework/Rust syntax diagnostics. Available rust-analyzer diagnostics on projected Rust are mapped back to authored regions. |
 
@@ -68,7 +70,7 @@ Restart the extension host after changing the executable setting. Server stdout 
 
 ## Modules and checks
 
-`src/extension.ts` owns startup; `src/editor/` separates formatting, markup tokenization, component navigation, tag tokens, Rust projection and protocol types. `syntaxes/` owns TextMate highlighting. Source metadata and generation live in the compiler; protocol diagnostics/formatting live in the [Rust server](../../packages/inrux-language-server/README.md).
+`src/extension.ts` owns startup; `src/editor/` separates formatting, markup tokenization, completion context/items, shared component-path resolution, navigation, tag tokens, Rust projection and protocol types. The compiler owns built-in attribute and public Props metadata. `syntaxes/` owns TextMate highlighting. Source metadata and generation live in the compiler; protocol diagnostics/formatting live in the [Rust server](../../packages/inrux-language-server/README.md).
 
 ```sh
 npm run check --prefix tooling/inrux-vscode

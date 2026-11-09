@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "node:path";
 import { realpath } from "node:fs/promises";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
+import { registerComponentCompletion } from "./editor/completion";
 import { registerFormatting } from "./editor/formatting";
 import { registerComponentNavigation } from "./editor/navigation";
 import { RustSupport } from "./editor/rust";
@@ -44,6 +45,7 @@ export async function activate(
   client.getFeature("textDocument/formatting").clear();
   registerFormatting(context, client);
   registerComponentNavigation(context, client);
+  registerComponentCompletion(context, client);
   registerTagColors(context, client);
   new RustSupport(client, output).register(context);
 }

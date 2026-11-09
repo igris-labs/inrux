@@ -136,43 +136,7 @@ impl Element {
 
     /// Framework-owned tags do not require application imports.
     pub(crate) fn is_builtin(&self) -> bool {
-        matches!(
-            self.tag.to_string().as_str(),
-            "Markdown"
-                | "Flex"
-                | "ScrollArea"
-                | "Card"
-                | "Badge"
-                | "Separator"
-                | "Grid"
-                | "AspectRatio"
-                | "Box"
-                | "Container"
-                | "Center"
-                | "Spacer"
-                | "Column"
-                | "Row"
-                | "Text"
-                | "Button"
-                | "Input"
-                | "TextInput"
-                | "TextArea"
-                | "If"
-                | "Heartbeat"
-                | "Component"
-                | "Switch"
-                | "Progress"
-                | "Meter"
-                | "Checkbox"
-                | "Select"
-                | "Dialog"
-                | "Slot"
-                | "Children"
-                | "Provide"
-                | "For"
-                | "ElseIf"
-                | "Else"
-        )
+        crate::schema::BUILTINS.contains(&self.tag.to_string().as_str())
     }
 
     /// Model update listeners augment the generated setter instead of defining a second event prop.
@@ -215,34 +179,7 @@ impl Element {
             syn::parse_str::<Ident>(&self.tag.to_string().to_lowercase())
                 .map_err(|_| self.error(format!("Invalid component name `{}`", self.tag)))?;
         }
-        let mut accepted = vec![
-            "id", "class", "style", "gap", "padding", "width", "height", "key",
-        ];
-        accepted.extend(match self.tag.to_string().as_str() {
-            "Markdown" => vec!["document"],
-            "Flex" => vec!["direction", "wrap"],
-            "Grid" => vec!["columns"],
-            "AspectRatio" => vec!["ratio"],
-            "Text" | "Badge" => vec!["text"],
-            "Separator" => vec!["vertical"],
-            "ScrollArea" => vec!["scroll_to", "@scroll"],
-            "Button" => vec!["text", "disabled", "@click"],
-            "Input" | "TextInput" | "TextArea" => {
-                vec!["value", "model:value", "@input", "placeholder", "disabled"]
-            }
-            "If" | "ElseIf" => vec!["condition"],
-            "Progress" => vec!["label", "value", "max"],
-            "Meter" => vec!["label", "value", "min", "max"],
-            "Checkbox" | "Switch" => {
-                vec!["checked", "model:checked", "@change", "label", "disabled"]
-            }
-            "Select" => vec!["value", "model:value", "options", "@change", "disabled"],
-            "Dialog" => vec!["open", "@close"],
-            "Provide" => vec!["value"],
-            "For" => vec!["each", "item", "key"],
-            "Component" => vec!["is"],
-            _ => vec![],
-        });
+        let accepted = crate::schema::attributes(&self.tag.to_string());
         let mut names = HashSet::new();
         for attr in &self.attrs {
             if builtin && !accepted.contains(&attr.name.trim_start_matches(':')) {

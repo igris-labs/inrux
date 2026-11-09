@@ -58,6 +58,163 @@ export async function run(): Promise<void> {
     components.every((item) => target(item).fsPath.endsWith("Example.iru")),
     "component click must not offer generated Rust targets",
   );
+  // Exercise actual completion/navigation providers against unsaved partial markup.
+  const original = doc.getText();
+  const label = (item: vscode.CompletionItem) =>
+    typeof item.label === "string" ? item.label : item.label.label;
+  const snapshot = async (text: string) => {
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(
+      uri,
+      new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)),
+      text,
+    );
+    await vscode.workspace.applyEdit(edit);
+  };
+  const suggestions = async (text: string, needle: string) => {
+    await snapshot(text);
+    return vscode.commands.executeCommand<vscode.CompletionList>(
+      "vscode.executeCompletionItemProvider",
+      uri,
+      doc.positionAt(doc.getText().indexOf(needle) + needle.length),
+    );
+  };
+  let items = await suggestions(
+    original.replace('<Example title="Child" />', "<Ex"),
+    "<Ex",
+  );
+  assert(
+    items?.items.some((item) => label(item) === "Example"),
+    "imported component names complete in unfinished tags",
+  );
+  items = await suggestions(
+    original.replace('<Example title="Child" />', "<Example "),
+    "<Example ",
+  );
+  assert(
+    items?.items.some(
+      (item) => label(item) === "title" && item.detail?.includes("str"),
+    ),
+    "public Props include Rust types",
+  );
+  items = await suggestions(
+    original.replace('<Example title="Child" />', "<Button "),
+    "<Button ",
+  );
+  assert(
+    items?.items.some((item) => label(item) === "@click"),
+    "built-in event completion",
+  );
+  assert(
+    items?.items.some((item) => label(item) === "disabled"),
+    "built-in prop completion",
+  );
+  items = await suggestions(
+    original.replace('<Example title="Child" />', "<Input model:"),
+    "<Input model:",
+  );
+  assert(
+    items?.items.some((item) => label(item) === "model:value"),
+    "native model completion",
+  );
+  await snapshot(
+    original.replace("</Column>", "<Input placeholder={</Column>"),
+  );
+  const incompleteDefinitions = await vscode.commands.executeCommand<
+    (vscode.Location | vscode.LocationLink)[]
+  >(
+    "vscode.executeDefinitionProvider",
+    uri,
+    find("Example title").translate(0, 2),
+  );
+  assert(
+    incompleteDefinitions?.some((item) =>
+      target(item).fsPath.endsWith("Example.iru"),
+    ),
+    "unfinished later markup must not break component navigation",
+  );
+  await snapshot(original);
+  const aliasDefinitions = await vscode.commands.executeCommand<
+    (vscode.Location | vscode.LocationLink)[]
+  >(
+    "vscode.executeDefinitionProvider",
+    uri,
+    find("as Example").translate(0, 5),
+  );
+  assert(
+    aliasDefinitions?.some((item) =>
+      target(item).fsPath.endsWith("Example.iru"),
+    ),
+    "import alias navigation resolves the source component",
+  );
+  const midAttribute =
+    await vscode.commands.executeCommand<vscode.CompletionList>(
+      "vscode.executeCompletionItemProvider",
+      uri,
+      find('title="Child"').translate(0, 2),
+    );
+  const titleSuggestion = midAttribute?.items.find(
+    (item) => label(item) === "title",
+  );
+  assert(titleSuggestion, "completion inside an existing attribute name");
+  assert.equal(
+    titleSuggestion.insertText,
+    "title",
+    "an existing attribute value must be preserved",
+  );
+  const titleRange = titleSuggestion.range as vscode.Range;
+  assert.equal(
+    doc.getText(titleRange),
+    "title",
+    "replace the whole name, including the suffix after the cursor",
+  );
+  const language = vscode.extensions.getExtension("inrux-local.inrux-vscode")!
+    .packageJSON.contributes.languages[0];
+  assert(
+    language.icon.light.endsWith("inrux-light.svg") &&
+      language.icon.dark.endsWith("inrux-dark.svg"),
+  );
+  const child = await vscode.workspace.openTextDocument(
+    vscode.Uri.file(path.join(root, "src/components/Example.iru")),
+  );
+  const originalChild = child.getText();
+  const childEdit = new vscode.WorkspaceEdit();
+  childEdit.replace(
+    child.uri,
+    new vscode.Range(
+      child.positionAt(0),
+      child.positionAt(originalChild.length),
+    ),
+    "<view>\n<Text />\n</view>\n<rust>\nuse inrux::prelude::*;\npub struct Props { pub title: String, pub value: String, pub on_update_value: Emit<String>, pub on_save: Emit<()>, private: bool }\n</rust>\n",
+  );
+  await vscode.workspace.applyEdit(childEdit);
+  items = await suggestions(
+    original.replace('<Example title="Child" />', "<Example "),
+    "<Example ",
+  );
+  for (const name of ["@save", "@update:value", "model:value"])
+    assert(
+      items?.items.some((item) => label(item) === name),
+      `unsaved child Props complete ${name}`,
+    );
+  assert(
+    !items?.items.some((item) => label(item) === "private"),
+    "private fields are not public props",
+  );
+  const restoreChild = new vscode.WorkspaceEdit();
+  restoreChild.replace(
+    child.uri,
+    new vscode.Range(
+      child.positionAt(0),
+      child.positionAt(child.getText().length),
+    ),
+    originalChild,
+  );
+  await vscode.workspace.applyEdit(restoreChild);
+  await snapshot(original);
+  console.log(
+    "TEST: component/prop/event/model completion, icons and partial-markup navigation passed",
+  );
   const edits = await eventually(
     "full formatter",
     () =>

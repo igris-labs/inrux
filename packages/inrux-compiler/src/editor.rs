@@ -1,5 +1,6 @@
 //! Compiler-owned block/import metadata shared by editor integrations.
 use crate::{CompileError, SourceFile, imports, sfc};
+use quote::ToTokens;
 use std::{collections::BTreeMap, ops::Range, sync::Arc};
 
 /// Original byte ranges; editors convert them to their own UTF-16 coordinates.
@@ -14,6 +15,34 @@ pub struct EditorDocument {
     pub imports: BTreeMap<String, Vec<String>>,
     /// Declaration/import binding ranges for navigation from view expressions.
     pub bindings: BTreeMap<String, Range<usize>>,
+    /// Public fields declared by this component in its Props struct.
+    pub props: BTreeMap<String, EditorProp>,
+}
+
+/// A public authored Props field, including the Rust type and declaration location.
+pub struct EditorProp {
+    /// Original Rust type spelling rendered by syn.
+    pub rust_type: String,
+    /// Rust doc comments, when present.
+    pub documentation: String,
+    /// Original field identifier range.
+    pub range: Range<usize>,
+}
+
+/// Return the same built-in attribute names used during compiler validation.
+pub fn builtin_attributes() -> BTreeMap<String, Vec<String>> {
+    crate::schema::BUILTINS
+        .iter()
+        .map(|tag| {
+            (
+                (*tag).to_owned(),
+                crate::schema::attributes(tag)
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect(),
+            )
+        })
+        .collect()
 }
 
 /// Extract editor regions even when the view or Rust code is temporarily incomplete.
@@ -26,6 +55,51 @@ pub fn editor_document(source: SourceFile) -> Result<EditorDocument, CompileErro
     let rust = syn::parse_file(&source.text()[blocks.rust.body.clone()]).ok();
     let imports = rust.as_ref().map(imports::imports).unwrap_or_default();
     let mut bindings = BTreeMap::new();
+    let mut props = BTreeMap::new();
+    if let Some(rust) = &rust {
+        for item in &rust.items {
+            let syn::Item::Struct(item) = item else {
+                continue;
+            };
+            if item.ident != "Props" {
+                continue;
+            }
+            for field in &item.fields {
+                let Some(ident) = &field.ident else { continue };
+                if !matches!(field.vis, syn::Visibility::Public(_)) {
+                    continue;
+                }
+                let documentation = field
+                    .attrs
+                    .iter()
+                    .filter_map(|attr| {
+                        if !attr.path().is_ident("doc") {
+                            return None;
+                        }
+                        let syn::Meta::NameValue(meta) = &attr.meta else {
+                            return None;
+                        };
+                        let syn::Expr::Lit(value) = &meta.value else {
+                            return None;
+                        };
+                        let syn::Lit::Str(text) = &value.lit else {
+                            return None;
+                        };
+                        Some(text.value().trim().to_owned())
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                props.insert(
+                    ident.to_string(),
+                    EditorProp {
+                        rust_type: field.ty.to_token_stream().to_string(),
+                        documentation,
+                        range: source.parser_range(blocks.rust.body.clone(), ident.span()),
+                    },
+                );
+            }
+        }
+    }
     if let Some(rust) = &rust {
         let mut identifiers = Vec::new();
         for item in &rust.items {
@@ -56,6 +130,7 @@ pub fn editor_document(source: SourceFile) -> Result<EditorDocument, CompileErro
             .collect(),
         imports,
         bindings,
+        props,
     })
 }
 

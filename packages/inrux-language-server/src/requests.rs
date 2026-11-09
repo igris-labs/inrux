@@ -1,6 +1,6 @@
 //! Handle only capabilities that the server advertises and can validate.
 use crate::documents::{Documents, position};
-use inrux_compiler::{SourceFile, editor_document, format_source};
+use inrux_compiler::{SourceFile, builtin_attributes, editor_document, format_source};
 use lsp_server::{Request, Response};
 use serde_json::{Value, json};
 /// Format embedded Rust atomically; unsupported requests receive the standard method-not-found error.
@@ -42,6 +42,8 @@ fn document_info(
     let range = |range: std::ops::Range<usize>| json!({"start":position(text, range.start),"end":position(text, range.end)});
     Ok(
         json!({"rust":range(info.rust),"view":range(info.view),"styles":info.styles.into_iter().map(range).collect::<Vec<_>>(),"imports":info.imports,
+            "builtins":builtin_attributes(),
+            "props":info.props.into_iter().map(|(name,prop)|(name,json!({"type":prop.rust_type,"documentation":prop.documentation,"range":range(prop.range)}))).collect::<std::collections::BTreeMap<_,_>>(),
             "bindings":info.bindings.into_iter().map(|(name, span)|(name,range(span))).collect::<std::collections::BTreeMap<_,_>>()}),
     )
 }
@@ -81,6 +83,45 @@ mod tests {
                 .as_str()
                 .unwrap()
                 .contains("pub value: u32")
+        );
+    }
+
+    /// Completion metadata follows the compiler grammar and public Rust fields.
+    #[test]
+    fn editor_info_exposes_builtin_attributes_and_typed_public_props() {
+        let text = "<view>\n<Text />\n</view>\n<rust>\nuse inrux::prelude::*;\npub struct Props {\n/// User-facing caption.\npub title: String, pub on_save: Emit<()>, private: bool,\n}\n</rust>\n";
+        let info = document_info(
+            &json!({"textDocument":{"uri":"file:///Example.iru"},"text":text}),
+            &Documents::default(),
+        )
+        .unwrap();
+        for attrs in info["builtins"].as_object().unwrap().values() {
+            let names: std::collections::BTreeSet<_> = attrs
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|name| name.as_str().unwrap())
+                .collect();
+            assert_eq!(names.len(), attrs.as_array().unwrap().len());
+        }
+        assert_eq!(info["props"]["title"]["type"], "String");
+        assert_eq!(
+            info["props"]["title"]["documentation"],
+            "User-facing caption."
+        );
+        assert_eq!(info["props"]["title"]["range"]["start"]["line"], 7);
+        assert!(info["props"].get("private").is_none());
+        assert!(
+            info["builtins"]["Button"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("@click"))
+        );
+        assert!(
+            info["builtins"]["Input"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("model:value"))
         );
     }
 

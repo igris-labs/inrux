@@ -35,6 +35,10 @@ The supported blocks are `<view>`, `<rust>`, `<style>` and `<style scoped>`. `<t
 
 `compile` handles in-memory input; `compile_file` compiles one file; `build_app` produces a reachable bootstrap. `format_source` delegates the Rust body to rustfmt and preserves view/style bytes, comments and block spellings.
 
+## Editor metadata
+
+`editor_document` returns original block/import/binding ranges and public Props fields with Rust types, doc comments and identifier spans. `builtin_attributes` returns the same built-in tag/attribute names used by validation; `schema.rs` owns that shared vocabulary. The language server exposes this metadata to VS Code without a separate Rust parser in TypeScript. Syntactically incomplete Rust temporarily has no custom import/Props metadata; built-in completion remains available when SFC blocks can be identified.
+
 ## Diagnostics and modules
 
 `source.rs` indexes UTF-8 ranges; `sfc.rs` recognizes lexical block boundaries; `view.rs` parses markup; `imports.rs` resolves explicit aliases; `controls.rs` lowers bindings; `codegen.rs` lowers composition; `style_codegen.rs` translates styles; `build.rs` owns Cargo integration.

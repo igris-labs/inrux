@@ -1,5 +1,8 @@
 /** Reindent tags while retaining all bytes inside attributes, expressions, strings and comments. */
-export function viewTags(body: string): { start: number; text: string }[] {
+export function viewTags(
+  body: string,
+  allowIncomplete = false,
+): { start: number; text: string }[] {
   const tags: { start: number; text: string }[] = [];
   let offset = 0;
   while (offset < body.length) {
@@ -10,12 +13,19 @@ export function viewTags(body: string): { start: number; text: string }[] {
     const start = offset;
     if (body.startsWith("<!--", offset)) {
       const end = body.indexOf("-->", offset + 4);
-      if (end < 0)
+      if (end < 0) {
+        if (allowIncomplete) return tags;
         throw new Error("Cannot format an unterminated view comment");
+      }
       offset = end + 3;
     } else {
-      if (body[offset] !== "<")
+      if (body[offset] !== "<") {
+        if (allowIncomplete) {
+          offset++;
+          continue;
+        }
         throw new Error("Cannot format view text outside a component tag");
+      }
       offset++;
       let braces = 0,
         quote = "",
@@ -48,7 +58,13 @@ export function viewTags(body: string): { start: number; text: string }[] {
         }
         if (braces && ch === "/" && next === "/") {
           const end = body.indexOf("\n", offset);
-          if (end < 0) throw new Error("Unterminated expression");
+          if (end < 0) {
+            if (allowIncomplete) {
+              offset = body.length;
+              break;
+            }
+            throw new Error("Unterminated expression");
+          }
           offset = end;
           continue;
         }
@@ -76,7 +92,10 @@ export function viewTags(body: string): { start: number; text: string }[] {
         }
         if (ch === "{") braces++;
         else if (ch === "}") {
-          if (--braces < 0) throw new Error("Unbalanced view expression");
+          if (--braces < 0) {
+            if (allowIncomplete) return tags;
+            throw new Error("Unbalanced view expression");
+          }
         } else if (ch === ">" && braces === 0) {
           offset++;
           break;
@@ -89,8 +108,13 @@ export function viewTags(body: string): { start: number; text: string }[] {
         quote ||
         rawEnd ||
         comments
-      )
+      ) {
+        if (allowIncomplete) {
+          tags.push({ start, text: body.slice(start) });
+          return tags;
+        }
         throw new Error("Cannot format an incomplete view tag");
+      }
     }
     tags.push({ start, text: body.slice(start, offset) });
   }

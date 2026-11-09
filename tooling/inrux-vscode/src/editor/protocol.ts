@@ -8,11 +8,18 @@ export interface Region {
   start: Position;
   end: Position;
 }
+export interface PropInfo {
+  type: string;
+  documentation: string;
+  range: Region;
+}
 export interface DocumentInfo {
   rust: Region;
   view: Region;
   styles: Region[];
   imports: Record<string, string[]>;
+  builtins: Record<string, string[]>;
+  props: Record<string, PropInfo>;
   bindings: Record<string, Region>;
 }
 export const range = (r: Region): vscode.Range =>
