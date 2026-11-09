@@ -1,0 +1,34 @@
+<view>
+    <Box class="stack">
+        <DemoPanel title="Input models and Button states">
+            <Text text="Workspace name" class="body" />
+            <Input model:value={state.name} @input={mark_dirty} placeholder="Enter a workspace name" :disabled={state.locked} class="input" />
+            <Text :text={if state.saved { "All changes saved in memory." } else { "You have unsaved changes." }} class="muted" />
+            <Row :style={Style::new().wrap(true)} gap={8.0}>
+                <Button text="Save changes" @click={save} :disabled={state.saved} :style={primary_style(state.saved)} />
+                <Button text="Reset name" @click={reset} class="button" />
+                <Button text="Clear name" @click={clear} class="button" />
+                <Button text="Disabled button" @click={forbidden} :disabled={true} :style={primary_style(true)} />
+            </Row>
+            <Checkbox label="Disable the name input" model:checked={state.locked} class="body" />
+        </DemoPanel>
+        <DemoPanel title="Checkbox values and disabled admission">
+            <Checkbox label="Enable notifications" model:checked={state.notifications} class="body" />
+            <Checkbox label="Disable the checkbox below" model:checked={state.checkbox_locked} class="body" />
+            <Checkbox label="Controlled choice" model:checked={state.choice} :disabled={state.checkbox_locked} class="body" />
+            <Text :text={format!("Notifications: {} | Choice: {} | Disabled activations: {}", state.notifications, state.choice, state.forbidden)} class="muted" />
+            <Text text="Try Tab, typing, selection, Space and Enter. Disabled controls reject interaction." class="muted" />
+        </DemoPanel>
+    </Box>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::components::demo_panel as DemoPanel;
+use crate::features::controls::{mark_dirty, save, reset, clear, forbidden, primary_style};
+#[derive(Clone)]
+pub struct Props {}
+#[derive(Clone)]
+pub struct State { pub props: Props, pub name: String, pub saved: bool, pub locked: bool, pub notifications: bool, pub checkbox_locked: bool, pub choice: bool, pub forbidden: u32 }
+/// Controlled values have one owner and deterministic reset state.
+pub fn setup(props: Props) -> State { State { props, name: "Inrux Workspace".into(), saved: true, locked: false, notifications: false, checkbox_locked: false, choice: true, forbidden: 0 } }
+</rust>

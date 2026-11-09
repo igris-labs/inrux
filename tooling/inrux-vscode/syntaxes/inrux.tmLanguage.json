@@ -1,0 +1,188 @@
+{
+  "scopeName": "source.inrux",
+  "patterns": [
+    {
+      "include": "#rust-block"
+    },
+    {
+      "include": "#style-block"
+    },
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#tag"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.block.html.inrux",
+      "begin": "<!--",
+      "end": "-->"
+    },
+    "rust-block": {
+      "name": "meta.block.rust.inrux",
+      "begin": "^\\s*(<)(rust)(>)\\s*$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.inrux"
+        },
+        "2": {
+          "name": "entity.name.tag.inrux"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.inrux"
+        }
+      },
+      "end": "^\\s*(</)(rust)(>)\\s*$",
+      "endCaptures": {
+        "2": {
+          "name": "entity.name.tag.inrux"
+        }
+      },
+      "contentName": "source.rust",
+      "patterns": [
+        {
+          "include": "source.rust"
+        }
+      ]
+    },
+    "style-block": {
+      "name": "meta.block.style.inrux",
+      "begin": "^\\s*(<)(style)(?:\\s+(scoped))?(>)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "entity.name.tag.inrux"
+        },
+        "3": {
+          "name": "entity.other.attribute-name.inrux"
+        }
+      },
+      "end": "^\\s*(</)(style)(>)\\s*$",
+      "endCaptures": {
+        "2": {
+          "name": "entity.name.tag.inrux"
+        }
+      },
+      "contentName": "source.css",
+      "patterns": [
+        {
+          "include": "source.css"
+        }
+      ]
+    },
+    "expression": {
+      "name": "meta.expression.inrux",
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.begin.inrux"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.end.inrux"
+        }
+      },
+      "contentName": "source.rust",
+      "patterns": [
+        {
+          "include": "#expression"
+        },
+        {
+          "include": "source.rust"
+        }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.inrux",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "match": "\\\\.",
+          "name": "constant.character.escape.inrux"
+        }
+      ]
+    },
+    "component": {
+      "name": "meta.tag.inrux",
+      "begin": "(</?)([A-Z][A-Za-z0-9_]*)(?=[\\s/>])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.inrux"
+        },
+        "2": {
+          "name": "entity.name.type.class.inrux"
+        }
+      },
+      "end": "/?>",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.end.inrux"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#expression"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "name": "entity.other.attribute-name.inrux",
+          "match": "[@:]?[A-Za-z_][A-Za-z0-9_]*(?::[A-Za-z_][A-Za-z0-9_]*)?(?=\\s*=)"
+        },
+        {
+          "name": "keyword.operator.assignment.inrux",
+          "match": "="
+        }
+      ]
+    },
+    "lowercase": {
+      "name": "meta.tag.inrux",
+      "begin": "(</?)([a-z_][A-Za-z0-9_]*)(?=[\\s/>])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.inrux"
+        },
+        "2": {
+          "name": "entity.name.tag.inrux"
+        }
+      },
+      "end": "/?>",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.end.inrux"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#expression"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "name": "entity.other.attribute-name.inrux",
+          "match": "[@:]?[A-Za-z_][A-Za-z0-9_]*(?::[A-Za-z_][A-Za-z0-9_]*)?(?=\\s*=)"
+        },
+        {
+          "name": "keyword.operator.assignment.inrux",
+          "match": "="
+        }
+      ]
+    },
+    "tag": {
+      "patterns": [
+        {
+          "include": "#component"
+        },
+        {
+          "include": "#lowercase"
+        }
+      ]
+    }
+  }
+}

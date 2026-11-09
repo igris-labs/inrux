@@ -1,0 +1,21 @@
+[package]
+name = "inrux-playground-egui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+inrux = { workspace = true, default-features = false, features = ["egui", "markdown"] }
+
+[build-dependencies]
+inrux-compiler.workspace = true
+
+[dev-dependencies]
+inrux-adapter.workspace = true
+inrux-compiler.workspace = true
+eframe.workspace = true
+inrux-egui.workspace = true
+
+[lints]
+workspace = true

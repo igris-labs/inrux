@@ -1,0 +1,5 @@
+/// Generate the reachable component bootstrap and Cargo rebuild inputs.
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    inrux_compiler::build_app("src/App.iru", std::env::var("OUT_DIR")?)?;
+    Ok(())
+}

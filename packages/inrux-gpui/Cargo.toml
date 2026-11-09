@@ -1,0 +1,38 @@
+[package]
+name = "inrux-gpui"
+version.workspace = true
+edition.workspace = true
+license = "MIT AND Apache-2.0"
+publish.workspace = true
+
+[features]
+default = []
+# Development fallback for macOS hosts without the optional Xcode Metal compiler.
+runtime-shaders = ["gpui/runtime_shaders"]
+
+[dependencies]
+image = { version = "=0.25.10", default-features = false }
+inrux-text.workspace = true
+unicode-segmentation = "1"
+inrux-adapter = { workspace = true, features = ["taffy-layout"] }
+inrux-components.workspace = true
+inrux-core.workspace = true
+inrux-style.workspace = true
+futures = { version = "0.3", default-features = false, features = ["std", "async-await"] }
+gpui = { version = "=0.2.2", default-features = false }
+
+[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
+gpui = { version = "=0.2.2", default-features = false, features = ["x11", "wayland"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# Required: without this feature GPUI deliberately selects its no-op text system.
+gpui = { version = "=0.2.2", default-features = false, features = ["font-kit"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+gpui = { version = "=0.2.2", default-features = false, features = ["windows-manifest"] }
+
+[dev-dependencies]
+gpui = { version = "=0.2.2", default-features = false, features = ["test-support"] }
+
+[lints]
+workspace = true

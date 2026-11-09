@@ -1,0 +1,31 @@
+# Shared typography across native engines
+
+The three bindings now use `inrux-text`, independent of their GUI libraries. Previously identical font files still passed through egui's glyph layout/rasterizer, Masonry's quantized Parley/Vello text path and GPUI's platform text system. The result differed in weight, size/spacing and baseline placement. Shared layout now uses Parley without logical-pixel quantization, and glyph coverage comes from Swash for all three engines.
+
+## Contract and native boundaries
+
+The common provider owns font selection, logical font size, the default line-height ratio, shaping/kerning/ligatures, wrapping, glyph positions, UTF-8 cluster geometry and rasterization. Bundled Noto Sans Regular is the default; existing app-provided fonts and inherited CSS/Rust font-family/font-size overrides continue to work. Noto Sans Mono stays a playground asset and is registered in the same provider. Explicit CSS font weight/line-height/tracking syntax is not added by this correction.
+
+Native engines continue to own windows, event delivery, clipping, focus, clipboard, IME connection and accessibility integration. They upload common RGBA glyph tiles through native image primitives rather than independently rasterizing application text. egui converts to its premultiplied image representation, GPUI uploads BGRA, and Masonry uses straight-alpha Vello image data. Glyph tiles retain transparent border pixels to prevent image-edge antialiasing from multiplying glyph coverage. The pinned Vello 0.6 image path samples integer device positions and subtracts half a texel for bilinear sampling; the Masonry upload bridge normalizes that sampling phase at every display scale. Tile boundaries preserve the same pixels and physical glyph offsets; overlong text is not truncated to one texture.
+
+- egui: `typography.rs` projects common character positions into native editor/selection metadata using one invisible space-glyph template. Content glyphs are not shaped/rasterized a second time by egui. `text_image.rs` uploads the common pixels; Text, Button, booleans, editors/placeholders and egui-only Select/Heartbeat use it. Existing controlled edits, paste, selection, scrolling, disabled admission and native keyboard handling remain active.
+- GPUI: `layout.rs`, `widgets/text.rs` and `widgets/input/layout.rs` use the common immutable shape. Editor mouse/IME positions and visual selections follow that shape. Native input events and UTF-16 platform ranges continue through existing bridges. Marked-range underlines use shared font/selection geometry in GPUI and Masonry; egui retains native composition highlighting. `widgets/text_image.rs` uploads/evicts the common pixels using GPUI's image atlas.
+- Masonry: private Label/TextArea adaptations keep native semantics and accesskit/Parley editor behavior. Labels use the common cached shape directly; editors use the same font registry and unquantized Parley configuration. Both rasterize through the same provider. `widgets/text_image.rs` uploads tiles through Vello. Caret/selection geometry uses logical line boxes rather than overflowing ascent/descent. Wrapped accessible bounds exclude trailing whitespace outside the visible allocation. Framework child composition restores fractional positions lost by Masonry's whole-logical-pixel placement, independently of scroll translation. Native button labels retain common visual centering when constrained; booleans preserve fractional label origins. Input borders reserve no layout inset, and single-line text/placeholder content is centered using the common line box; multiline content keeps authored top padding.
+
+The public component definitions, `.iru` syntax and playground CSS remain engine-independent. Provider metadata truthfully reports `inrux-shared-text` as the shared/fallback text provider. Only the selected GUI engine is linked by an ordinary app.
+
+## Cache and performance boundaries
+
+Shaping keys include text, family, logical size and wrap width; startup font registration invalidates the font environment. Shaping history is capped by count and an estimated byte budget. Colored device-scale RGBA tiles use a separate byte budget and stable upload identities. Warm draws reuse native uploads. Long editors rasterize their visible region; complete static text uses bounded tiles. Native glyph image uploads have their own eviction budgets. Font/shaper/scaler internals and native GPU resources are additional memory, so these budgets are not a total application-memory limit.
+
+The release provider fixture records cold initialization/shaping, first raster, then 1,000 warm shape/raster requests. It excludes the native adapter, GPU upload, event loop and compositor. Its output does not establish unchanged startup time, frame rate, typing latency or total memory. This change bundles a default font and adds shared text dependencies to engines that previously used their own pipeline.
+
+## Validation and limits
+
+Native tests retain editing, Unicode grapheme actions, UTF-16 preedit, focus, disabled behavior, keyboard/pointer activation, clipping and scrolling checks. New tests verify common caret/selection boxes, UTF-8 editor metadata, exact tile-versus-region coverage, cache/upload identity, scaling and visible tail glyphs beyond ordinary texture widths. A Masonry regression checks fractional text-position preservation.
+
+Manual cross-engine checks should cover headings, body, labels, usage code, both themes and editors. Glyph-source equality tests do not establish final native screenshot equality. Hardware sampling/filtering, color management, system fallback fonts, native control placement and OS/compositor differences still need validation on each supported platform. Whole-window pixel identity is not claimed. Full bidirectional native-editor navigation, comprehensive multilingual IME behavior, screen-reader audits and Windows/Linux rendering are not certified by the current suite.
+
+See [the shared crate](../packages/inrux-text/README.md), [alpha status](STATUS.md).
+
+Advanced egui embedding must initialize both font registries through `inrux_egui::configure_fonts`; plain egui FontDefinitions are insufficient for the shared provider. The normal Inrux window startup path already does this.

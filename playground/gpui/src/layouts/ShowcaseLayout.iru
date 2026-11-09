@@ -1,0 +1,52 @@
+<view>
+    <Column class="dashboard">
+        <Row class="topbar" :style={Style::new().align_items(Align::Center)}>
+            <Text text="Inrux  /  Docs" class="brand" />
+            <Text text="Components  /" class="breadcrumb" />
+            <Text :text={props.page.title()} class="breadcrumb-current" />
+            <Spacer />
+            <Badge :text={props.engine} class="engine-label" />
+            <Button :text={if props.dark { "Light theme" } else { "Dark theme" }} @click={props.on_theme.clone()} class="button" />
+        </Row>
+        <Row class="workspace-body">
+            <Sidebar :page={props.page} @navigate={props.on_navigate.clone()} />
+            <Column class="sheet">
+                <ScrollArea :key={props.page.title()} :scroll_to={props.request} class="content-scroll">
+                    <Row class="reading-row">
+                        <Column class="reading-slot">
+                            <Column class="doc-content">
+                                <Column class="page-heading">
+                                    <Text :text={props.page.title()} class="page-title" />
+                                    <Text :text={props.page.description()} class="page-description" />
+                                </Column>
+                                <Children gap={24.0} />
+                            </Column>
+                        </Column>
+                        <If condition={wide(scope)} :width={Size::Px(190.0)} :height={Size::Px(0.0)} />
+                    </Row>
+                </ScrollArea>
+                <If condition={wide(scope)} class="toc-fixed">
+                    <Column class="page-rail">
+                        <Text text="On this page" class="rail-label" />
+                        <Row gap={8.0}>
+                            <Box class="rail-rule" />
+                            <Column class="rail-links">
+                                <Button text="Overview" @click={props.on_top.clone()} class="rail-button" />
+                                <Button text="End of page" @click={props.on_end.clone()} class="rail-button" />
+                            </Column>
+                        </Row>
+                    </Column>
+                </If>
+            </Column>
+        </Row>
+    </Column>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::components::sidebar as Sidebar;
+/// Shared documentation chrome; events keep application navigation and theme ownership at the root.
+#[derive(Clone)]
+pub struct Props { pub engine: &'static str, pub page: crate::navigation::Page, pub dark: bool, pub on_theme: Emit<()>, pub on_top: Emit<()>, pub on_end: Emit<()>, pub request: ScrollRequest, pub on_navigate: Emit<crate::navigation::Page>, pub children: Node }
+/// Track logical viewport width; all hosts provide the same framework-owned handle.
+fn wide(scope: &Scope) -> bool { scope.inject::<inrux::ViewportState>().is_some_and(|viewport| viewport.get().width >= 1180.0) }
+</rust>

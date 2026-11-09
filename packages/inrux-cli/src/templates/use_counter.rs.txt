@@ -1,0 +1,3 @@
+use inrux::Signal;
+/// Each invocation owns independent state; ordinary Rust imports enable reuse.
+pub fn use_counter() -> Signal<u32> { Signal::new(0) }

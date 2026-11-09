@@ -1,0 +1,34 @@
+<view>
+    <Box class="stack">
+        <DemoPanel title="Props, emitted events and computed state">
+            <Counter label="First counter" :count={state.first.count.get()} :doubled={state.first.doubled.get().unwrap_or_default()} @increment={increment_first} />
+            <Counter label="Second counter" :count={state.second.count.get()} :doubled={state.second.doubled.get().unwrap_or_default()} @increment={increment_second} />
+            <NameInput model:value={state.name} @update:value={mark_dirty} @confirmed={confirm_name} />
+            <Text :text={state.message.clone()} class="muted" />
+        </DemoPanel>
+        <DemoPanel title="Retained children and provide / inject">
+            <Row :style={Style::new().wrap(true)} gap={8.0}>
+                <Button text="Reverse rows" @click={reverse_rows} class="button" />
+                <Button text="Remove first" @click={remove_row} :disabled={state.rows.is_empty()} class="button" />
+                <Button text="Restore rows" @click={restore_rows} class="button" />
+            </Row>
+            <Box :style={injected_style(scope)}>
+                <For each={state.rows.iter()} item="row" key={row}>
+                    <RetainedCounter :label={format!("Row {row}")} />
+                </For>
+            </Box>
+        </DemoPanel>
+    </Box>
+</view>
+<rust>
+use inrux::Style;
+use crate::components::{demo_panel as DemoPanel, counter as Counter, name_input as NameInput, retained_counter as RetainedCounter};
+use crate::composables::use_counter::{Counter as CounterState, use_counter};
+use crate::features::composition::{increment_first, increment_second, mark_dirty, confirm_name, reverse_rows, remove_row, restore_rows, injected_style};
+#[derive(Clone)]
+pub struct Props {}
+#[derive(Clone)]
+pub struct State { pub props: Props, pub name: String, pub saved: bool, pub message: String, pub first: CounterState, pub second: CounterState, pub rows: Vec<u32> }
+/// Independent composable instances and keyed child mounts belong to this view.
+pub fn setup(props: Props) -> State { State { props, name: "Inrux Workspace".into(), saved: true, message: "Edit the custom model, then confirm its typed payload.".into(), first: use_counter(), second: use_counter(), rows: vec![1,2] } }
+</rust>

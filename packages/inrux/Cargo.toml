@@ -1,0 +1,28 @@
+[package]
+name = "inrux"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+markdown = ["dep:inrux-markdown"]
+egui = ["dep:inrux-egui"]
+gpui = ["dep:inrux-gpui"]
+gpui-runtime-shaders = ["gpui", "inrux-gpui/runtime-shaders"]
+masonry = ["dep:inrux-masonry"]
+devtools = ["inrux-egui?/devtools"]
+
+[dependencies]
+inrux-markdown = { workspace = true, optional = true }
+inrux-core.workspace = true
+inrux-style.workspace = true
+inrux-components.workspace = true
+inrux-adapter.workspace = true
+inrux-gpui = { workspace = true, optional = true }
+inrux-egui = { workspace = true, optional = true }
+inrux-masonry = { workspace = true, optional = true }
+
+[lints]
+workspace = true

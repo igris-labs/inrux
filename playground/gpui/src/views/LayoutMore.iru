@@ -1,0 +1,65 @@
+<view>
+    <Box class="stack">
+        <DemoPanel title="Flex direction and retained input">
+            <Row :style={Style::new().wrap(true)} gap={12.0}>
+                <Button :text={if state.column { "Use row direction" } else { "Use column direction" }} @click={toggle_direction} class="button" />
+                <Text text="Edit the input, then change direction. Its value stays with the same control." class="muted" />
+            </Row>
+            <Flex :direction={if state.column { FlexDirection::Column } else { FlexDirection::Row }} class="more-flex">
+                <Input key="layout-note" model:value={state.note} placeholder="This edit survives direction changes" width={Size::Px(300.0)} class="input" />
+                <Button :text={format!("Count: {}", state.count)} @click={increment} width={Size::Px(140.0)} class="button" />
+            </Flex>
+        </DemoPanel>
+        <DemoPanel title="Grid columns and AspectRatio">
+            <Row :style={Style::new().wrap(true)} gap={20.0}>
+                <Column width={Size::Px(260.0)} gap={10.0}>
+                    <Text text="Equal-width columns, automatic rows" class="body" />
+                    <Button :text={if state.three_columns { "Use two columns" } else { "Use three columns" }} @click={toggle_columns} class="button" />
+                    <Grid :columns={if state.three_columns { 3 } else { 2 }} class="uniform-grid">
+                        <Text text="Alpha" class="grid-cell" />
+                        <Text text="Beta" class="grid-cell" />
+                        <Text text="Gamma" class="grid-cell" />
+                        <Text text="Delta" class="grid-cell" />
+                        <Text text="Epsilon" class="grid-cell" />
+                        <Text text="Zeta" class="grid-cell" />
+                    </Grid>
+                </Column>
+                <Column width={Size::Px(300.0)} gap={10.0}>
+                    <Text text="Preferred width / height" class="body" />
+                    <Button :text={if state.square { "Use landscape ratio" } else { "Use square ratio" }} @click={toggle_ratio} class="button" />
+                    <AspectRatio :ratio={if state.square { 1.0 } else { 16.0 / 9.0 }} class="ratio-example">
+                        <Center height={Size::Fill}>
+                            <Text :text={if state.square { "1 : 1" } else { "16 : 9" }} />
+                        </Center>
+                    </AspectRatio>
+                </Column>
+            </Row>
+        </DemoPanel>
+    </Box>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::components::demo_panel as DemoPanel;
+use crate::features::layout_more::{toggle_direction, toggle_columns, toggle_ratio, increment};
+#[derive(Clone)]
+pub struct Props {}
+#[derive(Clone)]
+pub struct State {
+    pub props: Props,
+    pub column: bool,
+    pub three_columns: bool,
+    pub square: bool,
+    pub note: String,
+    pub count: u32,
+}
+/// Each view owns its interactive sizing choices and controlled input.
+pub fn setup(props: Props) -> State {
+    State { props, column: false, three_columns: false, square: true, note: String::new(), count: 0 }
+}
+</rust>
+<style scoped>
+.more-flex { gap: 12px; padding: 8px; background: #ffffff; border-radius: 6px; }
+.uniform-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.grid-cell { height: 30px; padding: 6px; font-size: 14px; background: #e4ebe7; border-radius: 4px; }
+.ratio-example { width: 120px; aspect-ratio: 1; background: #e4ebe7; border-radius: 6px; }
+</style>

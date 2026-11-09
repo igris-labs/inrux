@@ -1,0 +1,11 @@
+<view>
+    <Box class="demo-panel">
+        <Text :text={props.title} class="section-title" />
+        <Children gap={10.0} />
+    </Box>
+</view>
+<rust>
+use inrux::prelude::*;
+/// Shared panel layout keeps every view's content and spacing consistent.
+pub struct Props { pub title: &'static str, pub children: Node }
+</rust>

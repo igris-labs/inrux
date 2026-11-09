@@ -1,0 +1,70 @@
+<view>
+    <Box class="stack">
+        <DemoPanel title="Card, Badge and Separator">
+            <Text text="Shared components, composed once. Child controls keep their normal models and events." class="muted" />
+            <Card key="workspace-card" class="workspace-card">
+                <Row :style={Style::new().align_items(Align::Center)}>
+                    <Text text="Workspace settings" class="section-title" />
+                    <Spacer />
+                    <Badge :text={if state.name == state.saved_name { "Saved" } else { "Unsaved changes" }} :class={if state.name == state.saved_name { "saved-badge" } else { "pending-badge" }} />
+                </Row>
+                <Separator />
+                <Input key="content-name" model:value={state.name} placeholder="Workspace name" class="input" />
+                <Row gap={12.0} :style={Style::new().align_items(Align::Center).wrap(true)}>
+                    <Button text="Save card" @click={save} class="primary" />
+                    <Button text="Reset card" @click={reset} class="button" />
+                    <Separator vertical={true} height={Size::Px(30.0)} />
+                    <Text :text={format!("Saves: {}", state.saves)} class="body" />
+                </Row>
+            </Card>
+        </DemoPanel>
+        <DemoPanel title="CSS and Rust customization">
+            <Row :style={Style::new().wrap(true)} gap={16.0}>
+                <Card class="custom-content-card" width={Size::Px(250.0)}>
+                    <Row :style={Style::new().wrap(true)} gap={8.0}>
+                        <Badge text="CSS" class="custom-content-badge" />
+                        <Text text="Class-based surface" class="body" />
+                    </Row>
+                    <Separator class="custom-content-line" />
+                    <Text text="Padding, border, radius and colors override defaults." class="custom-content-copy" />
+                </Card>
+                <Card :style={custom_card()}>
+                    <Row :style={Style::new().wrap(true)} gap={8.0}>
+                        <Badge text="Rust" :style={custom_badge()} />
+                        <Text text="Typed style surface" class="body" />
+                    </Row>
+                    <Separator :style={custom_line()} />
+                    <Text text="The same resolved style goes through the selected adapter." class="custom-content-copy" />
+                </Card>
+            </Row>
+            <Text text="Separators are decorative. Badges are text, without automatic live announcements." class="muted" />
+        </DemoPanel>
+    </Box>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::components::demo_panel as DemoPanel;
+use crate::features::content::{save, reset, custom_card, custom_badge, custom_line};
+#[derive(Clone)]
+pub struct Props {}
+#[derive(Clone)]
+pub struct State {
+    pub props: Props,
+    pub name: String,
+    pub saved_name: String,
+    pub saves: u32,
+}
+/// Each visit owns a fresh in-memory example, with ordinary controlled input.
+pub fn setup(props: Props) -> State {
+    State { props, name: "Inrux Workspace".into(), saved_name: "Inrux Workspace".into(), saves: 0 }
+}
+</rust>
+<style scoped>
+.workspace-card { background: #ffffff; }
+.saved-badge { background: #e2f0e9; color: #185d4a; }
+.pending-badge { background: #fff0d1; color: #754c08; }
+.custom-content-card { padding: 12px; gap: 8px; border-radius: 6px; border-width: 1px; border-color: #a9bdb3; background: #edf4f0; }
+.custom-content-badge { padding: 6px; border-radius: 3px; background: #1d7062; color: #ffffff; }
+.custom-content-line { height: 2px; background: #a9bdb3; }
+.custom-content-copy { font-size: 14px; height: 42px; }
+</style>

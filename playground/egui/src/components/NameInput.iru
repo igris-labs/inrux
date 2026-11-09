@@ -1,0 +1,11 @@
+<view>
+    <Row gap={8.0}>
+        <Input :value={props.value.clone()} @input={props.on_update_value.clone()} class="input" placeholder="Reusable component model" width={Size::Px(320.0)} />
+        <Button class="button" text="Confirm name" @click={Emit::new(move |()| props.on_confirmed.emit(props.value.clone()))} />
+    </Row>
+</view>
+<rust>
+use inrux::prelude::*;
+/// A custom model is a typed value prop paired with its typed update event.
+pub struct Props { pub value: String, pub on_update_value: Emit<String>, pub on_confirmed: Emit<String> }
+</rust>

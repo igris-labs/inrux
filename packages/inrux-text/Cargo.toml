@@ -1,0 +1,14 @@
+[package]
+name = "inrux-text"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+inrux-style.workspace = true
+parley = "=0.6.0"
+swash = "=0.2.10"
+
+[lints]
+workspace = true

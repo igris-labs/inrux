@@ -1,0 +1,20 @@
+<view>
+    <Column class="app">
+        <Text text="Hello, Inrux" />
+        <Counter label="First" :count={state.first.get()} @increment={increment_first} />
+        <Counter label="Second" :count={state.second.get()} @increment={increment_second} />
+    </Column>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::components::counter as Counter;
+use crate::composables::use_counter::use_counter;
+#[derive(Clone)]
+pub struct State { first: Signal<u32>, second: Signal<u32> }
+/// Initialize independent composables once, outside view evaluation.
+pub fn setup() -> State { State { first: use_counter(), second: use_counter() } }
+/// Ordinary state-changing functions need no action enum.
+fn increment_first(state: &mut State, _: &Context<State>) { state.first.update(|n| *n += 1); }
+/// The second instance retains its own value.
+fn increment_second(state: &mut State, _: &Context<State>) { state.second.update(|n| *n += 1); }
+</rust>

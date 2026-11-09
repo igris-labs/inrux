@@ -1,0 +1,7 @@
+<template>
+    <Text text="Hello" mystery={true} />
+</template>
+<rust>
+pub struct State;
+pub enum Action {}
+</rust>

@@ -1,0 +1,113 @@
+{
+  "name": "inrux-vscode",
+  "displayName": "Inrux",
+  "description": "Inrux .iru formatting, component navigation, embedded Rust support and syntax highlighting.",
+  "version": "0.2.0",
+  "publisher": "inrux-local",
+  "private": true,
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "check": "tsc -p . --noEmit",
+    "watch": "tsc -p . --watch",
+    "install:local": "node scripts/install-local.mjs",
+    "dev": "node scripts/dev.mjs",
+    "test": "npm run compile && node scripts/test.mjs",
+    "test:unit": "npm run compile && node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-electron": "^3.1.0",
+    "typescript": "^5.8.0",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "inrux",
+        "aliases": [
+          "Inrux",
+          "iru"
+        ],
+        "extensions": [
+          ".iru"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "inrux",
+        "scopeName": "source.inrux",
+        "path": "./syntaxes/inrux.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.rust": "rust",
+          "source.css": "css"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "Inrux",
+      "properties": {
+        "inrux.server.path": {
+          "type": "string",
+          "default": "",
+          "description": "Language server executable; empty auto-detects the linked checkout build, then PATH."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[inrux]": {
+        "editor.defaultFormatter": "inrux-local.inrux-vscode",
+        "editor.semanticHighlighting.enabled": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+      }
+    },
+    "semanticTokenTypes": [
+      {
+        "id": "inruxComponent",
+        "superType": "class",
+        "description": "PascalCase Inrux component"
+      },
+      {
+        "id": "inruxLowercaseTag",
+        "superType": "keyword",
+        "description": "Lowercase Inrux syntax tag"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "inrux",
+        "scopes": {
+          "inruxComponent": [
+            "entity.name.type.class.inrux"
+          ],
+          "inruxLowercaseTag": [
+            "entity.name.tag.inrux"
+          ]
+        }
+      }
+    ]
+  },
+  "extensionDependencies": [
+    "rust-lang.rust-analyzer"
+  ],
+  "license": "MIT"
+}

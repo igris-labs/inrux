@@ -1,0 +1,19 @@
+[package]
+name = "inrux-playground-masonry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+inrux = { workspace = true, default-features = false, features = ["masonry", "markdown"] }
+
+[build-dependencies]
+inrux-compiler.workspace = true
+
+[dev-dependencies]
+inrux-adapter.workspace = true
+inrux-compiler.workspace = true
+
+[lints]
+workspace = true

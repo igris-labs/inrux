@@ -1,0 +1,39 @@
+<view>
+    <Column gap={28.0}>
+        <Text text="Demos" class="section-title" />
+        <DemoPanel title="Live preview">
+            <Row class="preview-toolbar" :style={Style::new().wrap(true)}>
+                <Text text="Interactive example" class="code-header" />
+                <Spacer />
+                <Button text="Reset example" @click={crate::catalogue::reset} class="button" />
+            </Row>
+            <Column class="preview-stage">
+                <Component :is={crate::catalogue::preview(state, events)} />
+            </Column>
+        </DemoPanel>
+        <Text text="Usage" class="section-title" />
+        <Column class="code-surface">
+            <Text text="Usage in .iru" class="code-header" />
+            <Markdown :document={state.usage.clone()} />
+        </Column>
+        <Column id="appearance">
+            <Markdown :document={state.documentation.clone()} />
+        </Column>
+    </Column>
+</view>
+<rust>
+use inrux::Style;
+use crate::components::demo_panel as DemoPanel;
+/// A keyed preview owns its values; sidebar and documentation layout own navigation only.
+#[derive(Clone)]
+pub struct Props { pub example: crate::catalogue::Example }
+/// Each specimen uses the ordinary controlled model/event protocol.
+#[derive(Clone)]
+pub struct State { pub props: Props, pub value: String, pub notes: String, pub checked: bool, pub disabled: bool, pub count: u32, pub usage: inrux::markdown::Markdown, pub documentation: inrux::markdown::Markdown }
+/// Use meaningful editable values and truthful zero counts.
+pub fn setup(props: Props) -> State {
+    let usage = inrux::markdown::Markdown::parse(&format!("```iru\n{}\n```", props.example.usage()));
+    let documentation = inrux::markdown::Markdown::parse(&format!("### Appearance and API\n\nUse classes for reusable styles and IDs for specific elements. Explicit Rust styles override stylesheet rules.\n\n### State and bindings\n\n{}\n\n- Theme and viewport changes preserve this example's state.\n- Switching components starts a fresh example.",props.example.description()));
+    State { props, usage, documentation, value: "Inrux Workspace".into(), notes: "First line\nA native multiline editor.\n".into(), checked: false, disabled: false, count: 0 }
+}
+</rust>

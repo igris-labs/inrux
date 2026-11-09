@@ -1,0 +1,22 @@
+<view>
+    <Column class="sidebar">
+        <Box class="sidebar-header">
+            <Text text="Component explorer" class="sidebar-title" />
+        </Box>
+        <ScrollArea key="catalogue-navigation" class="sidebar-scroll">
+            <Column class="sidebar-items">
+                <Component :is={crate::catalogue::sidebar(props.page, props.on_navigate.clone())} />
+            </Column>
+        </ScrollArea>
+        <Column class="sidebar-footer">
+            <Separator />
+            <Text text="Noto Sans · Native UI" class="sidebar-caption" />
+            <Text text="Local examples · v0.1" class="sidebar-caption" />
+        </Column>
+    </Column>
+</view>
+<rust>
+use inrux::prelude::*;
+/// Content spacing belongs to header/menu/footer, leaving the scrollbar on the pane edge.
+pub struct Props { pub page: crate::navigation::Page, pub on_navigate: Emit<crate::navigation::Page> }
+</rust>

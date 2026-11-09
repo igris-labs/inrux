@@ -1,0 +1,12 @@
+/target/
+/.taste-skill/
+*.log
+.DS_Store
+
+**/node_modules/
+tooling/inrux-vscode/out/
+*.vsix
+
+/internal/
+/plans/
+**/__pycache__/

@@ -1,0 +1,102 @@
+/* Immutable sheet tokens are substituted by build.rs into typed Rust values. */
+:root {
+    --background: #ffffff;
+    --foreground: #262626;
+    --muted: #717171;
+    --surface: #fafafa;
+    --secondary: #f4f4f4;
+    --selected: #e9e9e9;
+    --border: rgb(38 38 38 / 8%);
+    --control-border: rgb(38 38 38 / 16%);
+    --primary: oklch(24.35% 0 0);
+    --primary-foreground: #ffffff;
+    --gutter: 32px;
+    --radius: 6px;
+    --scroll-thumb: #b3b3b3;
+    --scroll-track: #fafafa;
+}
+.dashboard { accent-color: var(--primary); border-radius: 0; scrollbar-color: var(--scroll-thumb) var(--scroll-track); width: 100%; height: 100%; background: var(--background); color: var(--foreground); font-family: "Noto Sans"; font-size: 13px; }
+.topbar { border-radius: 0; height: 54px; padding: 12px; gap: 12px; border-width: 1px; border-color: var(--border); }
+.brand { width: 196px; font-size: 20px; height: 28px; }
+.breadcrumb { color: var(--muted); font-size: 12px; height: 22px; }
+.breadcrumb-current { font-size: 12px; height: 22px; }
+.engine-label { font-size: 11px; padding: 4px; background: var(--secondary); color: var(--muted); }
+.workspace-body { height: 0px; flex-grow: 1; gap: 0px; }
+.sidebar { border-radius: 0; width: 230px; height: 100%; padding: 0; gap: 0; border-width: 1px; border-color: var(--border); }
+.sidebar-header { padding: 14px; }
+.sidebar-items { padding: 14px; }
+.sidebar-footer { padding: 14px; gap: 10px; }
+.sidebar-title { font-size: 12px; height: 24px; color: var(--muted); }
+.sidebar-scroll { padding: 0; height: 0px; flex-grow: 1; gap: 4px; }
+.sidebar-caption { font-size: 11px; height: 18px; color: var(--muted); }
+.sidebar-group { height: 28px; font-size: 12px; padding: 5px; color: var(--foreground); }
+Button.nav-item { width: 100%; height: 32px; font-size: 12px; padding: 6px; border-radius: 5px; border-width: 0; background: var(--background); color: var(--muted); }
+Button.nav-item.selected { background: var(--selected); color: var(--foreground); }
+.sheet { position: relative; border-radius: 0; width: 0px; flex-grow: 1; height: 100%; }
+.content-scroll { height: 0px; flex-grow: 1; padding: var(--gutter); gap: 32px; }
+.doc-content { width: 100%; max-width: 670px; margin-inline: auto; gap: 28px; }
+.page-heading { gap: 8px; }
+.page-title { font-size: 30px; height: 42px; }
+.page-description { font-size: 14px; color: var(--muted); min-height: 44px; }
+.section-title { font-size: 18px; height: 28px; }
+.muted, .preview-description { color: var(--muted); font-size: 13px; min-height: 32px; }
+.body { min-height: 26px; }
+.demo-panel { padding: 20px; gap: 16px; border-color: var(--border); border-width: 1px; border-radius: 8px; }
+.preview-toolbar { padding: 12px; gap: 16px; background: var(--surface); border-radius: var(--radius); }
+.preview-stage { padding: 24px; gap: 16px; min-height: 180px; }
+.code-surface { padding: 16px; gap: 12px; background: var(--surface); border-width: 1px; border-color: var(--border); border-radius: 8px; }
+.usage-code, .md-code-text { font-family: "Noto Sans Mono"; white-space: pre; font-size: 13px; padding: 12px; color: var(--foreground); }
+.code-header { color: var(--muted); font-size: 11px; height: 24px; }
+Button { background: var(--secondary); color: var(--foreground); border-width: 0; border-radius: var(--radius); }
+.button, .primary { padding: 8px; height: 36px; border-width: 0; border-radius: var(--radius); }
+.primary { background: var(--primary); color: var(--primary-foreground); }
+Input, TextArea, .input { background: var(--background); color: var(--foreground); border-color: var(--control-border); border-width: 1px; border-radius: var(--radius); }
+.input { width: 100%; height: 42px; }
+Badge { background: var(--secondary); color: var(--foreground); }
+Card { background: var(--background); border-color: var(--border); }
+Separator { background: var(--border); }
+.stack { gap: 12px; }
+.reading-row { width: 100%; }
+.reading-slot { width: 0px; flex-grow: 1; }
+.toc-fixed { position: absolute; top: 32px; right: 24px; width: 160px; height: auto; }
+.page-rail { width: 100%; gap: 12px; }
+.rail-rule { width: 1px; height: 72px; background: var(--border); }
+.rail-links { width: 0px; flex-grow: 1; gap: 8px; }
+.md-code { padding: 12px; }
+.md-paragraph { color: var(--muted); }
+.md-quote { background: var(--surface); border-radius: 0; }
+.rail-label { color: var(--muted); font-size: 11px; height: 24px; }
+.rail-button { height: 30px; font-size: 12px; padding: 4px; background: var(--background); color: var(--muted); }
+#appearance { gap: 12px; padding: 16px; border-width: 1px; border-color: var(--border); border-radius: 8px; }
+@media (max-width: 1000px) {
+    .content-scroll { padding: 24px; }
+    .sidebar { border-radius: 0; width: 208px; padding: 0; }
+    .brand { width: 174px; }
+    .preview-stage { padding: 12px; }
+}
+@media (min-width: 1400px) {
+    .content-scroll { padding: 48px; }
+}
+
+/* Inherited control accents use the same semantic tokens in every native binding. */
+Progress, Meter { background: var(--secondary); height: 8px; border-radius: 4px; }
+.range-preview { row-gap: 16px; }
+.custom-accent { accent-color: #705bea; }
+
+/* Showcase recipes: component behavior has no knowledge of these visual choices. */
+Switch.headless-switch::part(track) { width: 42px; height: 24px; border-radius: 12px; background: var(--secondary); border-width: 1px; border-color: var(--control-border); }
+Switch.headless-switch::part(thumb) { width: 18px; height: 18px; border-radius: 9px; background: var(--background); }
+Switch.headless-switch::part(track):checked { background: var(--primary); border-color: var(--primary); }
+Switch.headless-switch::part(thumb):checked { background: var(--primary-foreground); }
+Switch.headless-switch::part(track):hover { border-color: var(--foreground); }
+Switch.headless-switch::part(track):focus-visible { border-width: 2px; border-color: var(--foreground); }
+Switch.headless-switch::part(track):disabled { background: var(--control-border); border-color: var(--control-border); }
+Checkbox.headless-checkbox::part(control) { width: 16px; height: 16px; border-radius: 4px; background: var(--background); border-color: var(--control-border); }
+Checkbox.headless-checkbox::part(control):checked { background: var(--primary); border-color: var(--primary); }
+Checkbox.headless-checkbox::part(indicator):checked { color: var(--primary-foreground); }
+Checkbox.headless-checkbox::part(control):focus-visible { border-width: 2px; border-color: var(--foreground); }
+Input::part(placeholder), TextArea::part(placeholder) { color: var(--muted); }
+Button:hover { background: var(--selected); }
+Button:disabled { background: var(--control-border); color: var(--muted); }
+
+.headless-switch { margin: 4px 0px; }

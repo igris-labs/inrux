@@ -1,0 +1,23 @@
+[package]
+name = "inrux-adapter"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["taffy-layout"]
+taffy-layout = ["dep:taffy"]
+
+[dependencies]
+taffy = { workspace = true, optional = true }
+inrux-core.workspace = true
+inrux-components.workspace = true
+inrux-style.workspace = true
+
+[lints]
+workspace = true
+
+[[example]]
+name = "layout_services"
+required-features = ["taffy-layout"]

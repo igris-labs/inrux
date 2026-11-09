@@ -1,0 +1,19 @@
+<view>
+    <Box class="stack">
+        <DemoPanel title="Engine support">
+            <Text :text={crate::engine::SUPPORT} class="body" />
+            <Text text="Layout: Taffy fallback · Text: native shaping · One bundled font" class="muted" />
+            <Text text="Clipping: native · Scrolling: shared policy · Portable overlays and refs: pending" class="muted" />
+        </DemoPanel>
+        <Component :is={crate::engine::specimen(state, events)} />
+    </Box>
+</view>
+<rust>
+use crate::components::demo_panel as DemoPanel;
+#[derive(Clone)]
+pub struct Props {}
+#[derive(Clone)]
+pub struct State { pub props: Props, pub selected: String, pub select_disabled: bool, pub show_dialog: bool, pub heartbeat: bool }
+/// Native examples keep controlled models in the same view state contract.
+pub fn setup(props: Props) -> State { State { props, selected: "Balanced".into(), select_disabled: false, show_dialog: false, heartbeat: true } }
+</rust>

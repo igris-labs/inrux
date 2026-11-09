@@ -1,0 +1,6 @@
+The private native input implementation adapts portions of GPUI 0.2.2 examples/input.rs, part of Zed, Copyright Zed Industries, Inc., licensed under the Apache License, Version 2.0.
+Authoritative packaged source: https://docs.rs/crate/gpui/0.2.2/source/examples/input.rs
+License: https://www.apache.org/licenses/LICENSE-2.0
+The source has been modified for Inrux controlled-model events, preedit handling, clipping, styles and error propagation.
+
+A local copy is included at ../../licenses/Apache-2.0.txt.

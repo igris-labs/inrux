@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1940" viewBox="0 0 1800 1940" role="img" aria-labelledby="title desc">
+<title id="title">Inrux target architecture — native delegation behind framework-owned contracts</title>
+<desc id="desc">Application and compiler feed engine-independent Inrux behavior, runtime and styling. Service contracts connect to one selected private adapter. Each service uses a conforming native implementation or a fallback. Native UI work stays on the UI thread, state on a coordinator, and blocking work in a bounded task pool. Layout/text interfaces are operational; native layout alternatives and other service contracts remain planned.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 Z" fill="#52667a"/></marker></defs>
+<rect width="1800" height="1940" fill="#ffffff"/>
+<style>text {font-family:Arial,Helvetica,sans-serif;fill:#192c40} .title {font-size:38px;font-weight:700} .section {font-size:25px;font-weight:700} .card {font-size:23px;font-weight:700} .body {font-size:20px} .small {font-size:18px;fill:#506478} .tag {font-size:17px;font-weight:700;letter-spacing:1px}</style>
+<text x="48" y="60" class="title">INRUX / Target architecture</text>
+<text x="48" y="98" class="body">Framework-owned behavior. Native execution wherever the contract can be met.</text>
+<text x="48" y="128" class="tag" style="fill:#765b20">DESIGN RECORD · 05 NOV 2026 · Native layout substitutions and incremental updates remain planned</text>
+<rect x="48" y="158" width="1704" height="100" rx="12" fill="#edf5f1" stroke="#9fbfb0" stroke-width="2"/>
+<text x="72" y="194" class="section">APPLICATION · one public inrux facade</text>
+<text x="72" y="230" class="body">main.rs mounts App.iru  •  reusable .iru components  •  Rust modules / composables / Cargo libraries</text>
+<path d="M900,258 L900,284" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="893,273 907,273 900,284" fill="#52667a"/>
+<rect x="48" y="284" width="1704" height="94" rx="12" fill="#f4f7fa" stroke="#c4d0dc" stroke-width="2"/>
+<text x="72" y="318" class="tag">BUILD &amp; DEVELOPER TOOLS</text>
+<text x="72" y="352" class="body">CLI + Cargo → .iru compiler → reachable component graph → generated Rust → rustc</text>
+<text x="1115" y="318" class="small">Editor / language server / formatter</text>
+<text x="1115" y="350" class="small">Build-time tools do not execute engine services.</text>
+<path d="M900,378 L900,404" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="893,393 907,393 900,404" fill="#52667a"/>
+<rect x="48" y="404" width="1704" height="414" rx="12" fill="#edf3fa" stroke="#99afc7" stroke-width="2"/>
+<text x="72" y="441" class="section">INRUX FRAMEWORK · owns semantics, not engine-specific handles</text>
+<rect x="72" y="465" width="396" height="179" rx="12" fill="#ffffff" stroke="#c4d0dc" stroke-width="2"/>
+<text x="92" y="500" class="card">Components &amp; composition</text>
+<text x="92" y="537" class="body">Props / models / typed events</text>
+<text x="92" y="566" class="body">Keys / generations / children</text>
+<text x="92" y="595" class="body">Lifecycle and ref contracts</text>
+<rect x="492" y="465" width="396" height="179" rx="12" fill="#ffffff" stroke="#c4d0dc" stroke-width="2"/>
+<text x="512" y="500" class="card">Styling &amp; layout rules</text>
+<text x="512" y="537" class="body">CSS subset + Rust styles</text>
+<text x="512" y="566" class="body">Themes / tokens / fonts</text>
+<text x="512" y="595" class="body">Inrux sizing and layout semantics</text>
+<rect x="912" y="465" width="396" height="179" rx="12" fill="#ffffff" stroke="#c4d0dc" stroke-width="2"/>
+<text x="932" y="500" class="card">Core &amp; reactivity</text>
+<text x="932" y="537" class="body">State / signals / computed</text>
+<text x="932" y="566" class="body">Dependency tracking / scopes</text>
+<text x="932" y="595" class="body">Instance ownership / cleanup</text>
+<rect x="1332" y="465" width="396" height="179" rx="12" fill="#ffffff" stroke="#c4d0dc" stroke-width="2"/>
+<text x="1352" y="500" class="card">Runtime orchestration</text>
+<text x="1352" y="537" class="body">Serialized state coordinator</text>
+<text x="1352" y="566" class="body">Bounded background task pool</text>
+<text x="1352" y="595" class="body">Updates / platform commands</text>
+<rect x="72" y="665" width="1656" height="62" rx="12" fill="#ffffff" stroke="#99afc7" stroke-width="2"/>
+<text x="92" y="704" class="body">Performance policy across modules: stable IDs • selective invalidation • batching • virtualization • idle scheduling</text>
+<text x="72" y="761" class="body">Contracts use Inrux values, stable identities, explicit errors and capability descriptions.</text>
+<text x="72" y="795" class="small">The same application behavior must survive engine selection; no engine checks in component source.</text>
+<path d="M900,818 L900,858" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="893,847 907,847 900,858" fill="#52667a"/>
+<polygon points="893,829 907,829 900,818" fill="#52667a"/>
+<text x="928" y="846" class="small">updates / commands ↓     events / measurements ↑</text>
+<rect x="48" y="866" width="1704" height="217" rx="12" fill="#eef7f6" stroke="#91bcb7" stroke-width="2"/>
+<text x="72" y="905" class="section">INRUX ENGINE ADAPTER CONTRACTS · replaceable services</text>
+<text x="72" y="948" class="body">Layout &amp; text measurement  |  native tree / identity  |  input / focus / IME / clipboard</text>
+<text x="72" y="982" class="body">Surfaces &amp; paint  |  window / display scale / assets  |  accessibility  |  frame scheduling</text>
+<text x="72" y="1021" class="body">Each service has one execution owner. Native and fallback implementations must satisfy the same behavior.</text>
+<text x="72" y="1056" class="small">Layout/text interfaces operational; other services planned. No public backend handle leakage.</text>
+<path d="M324,1083 L324,1126" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="317,1115 331,1115 324,1126" fill="#52667a"/>
+<path d="M900,1083 L900,1126" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="893,1115 907,1115 900,1126" fill="#52667a"/>
+<path d="M1476,1083 L1476,1126" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="1469,1115 1483,1115 1476,1126" fill="#52667a"/>
+<rect x="48" y="1126" width="552" height="244" rx="12" fill="#ffffff" stroke="#91bcb7" stroke-width="2"/>
+<text x="70" y="1165" class="section">egui adapter</text>
+<text x="70" y="1196" class="small">inrux-egui · private bindings</text>
+<text x="70" y="1238" class="body">Service provider selection:</text>
+<text x="70" y="1271" class="body">1. Use conforming native implementation</text>
+<text x="70" y="1304" class="body">2. Otherwise use a suitable fallback</text>
+<text x="70" y="1347" class="small">Retain native objects, caches and resources.</text>
+<rect x="624" y="1126" width="552" height="244" rx="12" fill="#ffffff" stroke="#91bcb7" stroke-width="2"/>
+<text x="646" y="1165" class="section">GPUI adapter</text>
+<text x="646" y="1196" class="small">inrux-gpui · private bindings</text>
+<text x="646" y="1238" class="body">Service provider selection:</text>
+<text x="646" y="1271" class="body">1. Use conforming native implementation</text>
+<text x="646" y="1304" class="body">2. Otherwise use a suitable fallback</text>
+<text x="646" y="1347" class="small">Retain native objects, caches and resources.</text>
+<rect x="1200" y="1126" width="552" height="244" rx="12" fill="#ffffff" stroke="#91bcb7" stroke-width="2"/>
+<text x="1222" y="1165" class="section">Masonry adapter</text>
+<text x="1222" y="1196" class="small">inrux-masonry · private bindings</text>
+<text x="1222" y="1238" class="body">Service provider selection:</text>
+<text x="1222" y="1271" class="body">1. Use conforming native implementation</text>
+<text x="1222" y="1304" class="body">2. Otherwise use a suitable fallback</text>
+<text x="1222" y="1347" class="small">Retain native objects, caches and resources.</text>
+<path d="M324,1370 L324,1406" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="317,1395 331,1395 324,1406" fill="#52667a"/>
+<path d="M900,1370 L900,1406" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="893,1395 907,1395 900,1406" fill="#52667a"/>
+<path d="M1476,1370 L1476,1406" fill="none" stroke="#52667a" stroke-width="2.5"/>
+<polygon points="1469,1395 1483,1395 1476,1406" fill="#52667a"/>
+<rect x="48" y="1406" width="552" height="91" rx="12" fill="#edf5f1" stroke="#9fbfb0" stroke-width="2"/>
+<text x="70" y="1442" class="card">egui native infrastructure</text>
+<text x="70" y="1476" class="small">Engine-specific execution stays behind its adapter.</text>
+<rect x="624" y="1406" width="552" height="91" rx="12" fill="#edf5f1" stroke="#9fbfb0" stroke-width="2"/>
+<text x="646" y="1442" class="card">GPUI native infrastructure</text>
+<text x="646" y="1476" class="small">Engine-specific execution stays behind its adapter.</text>
+<rect x="1200" y="1406" width="552" height="91" rx="12" fill="#edf5f1" stroke="#9fbfb0" stroke-width="2"/>
+<text x="1222" y="1442" class="card">Masonry native infrastructure</text>
+<text x="1222" y="1476" class="small">Engine-specific execution stays behind its adapter.</text>
+<rect x="48" y="1524" width="1704" height="109" rx="12" fill="#fff9ec" stroke="#c9af70" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="72" y="1561" class="section">FALLBACK PROVIDERS · used only by adapters that need them</text>
+<text x="72" y="1595" class="body">Existing library or focused Inrux implementation; private when used once, reusable when genuinely shared.</text>
+<text x="72" y="1621" class="small">Compile only required providers. Never silently change semantics; diagnose unsupported behavior.</text>
+<rect x="48" y="1661" width="1704" height="142" rx="12" fill="#f4f7fa" stroke="#c4d0dc" stroke-width="2"/>
+<text x="72" y="1699" class="section">THREAD &amp; EXECUTION OWNERSHIP</text>
+<text x="72" y="1735" class="body">UI thread: native trees / layout / text / paint / input   ↔   Coordinator: application state and view construction</text>
+<text x="72" y="1770" class="body">Bounded workers: owned background work → typed completion → coordinator; cancellation follows instance lifetime.</text>
+<text x="48" y="1841" class="tag">VALIDATION: contract conformance → native interaction tests → comparable release benchmarks → default-engine decision</text>
+<text x="48" y="1875" class="small">Current: replaceable layout/text contracts; Taffy layout + native text. Native layout substitutions remain planned.</text>
+<text x="48" y="1906" class="small">Only the selected engine is compiled. No live switching. Native delegation does not imply a measured speed advantage.</text>
+</svg>

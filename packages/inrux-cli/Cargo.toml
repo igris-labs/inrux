@@ -1,0 +1,19 @@
+[package]
+name = "inrux-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "cargo-inrux"
+path = "src/main.rs"
+
+[dependencies]
+inrux-compiler.workspace = true
+notify = "8"
+serde_json = "1"
+ctrlc = "3"
+
+[lints]
+workspace = true

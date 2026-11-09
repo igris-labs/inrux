@@ -1,0 +1,22 @@
+<view>
+    <Row gap={12.0}>
+        <Text :text={format!("{}: {}", props.label, props.count)} class="label" />
+        <Text :text={format!("Double: {}", props.doubled)} class="computed" />
+        <Button text="Increment" @click={props.on_increment.clone()} class="increment" />
+    </Row>
+</view>
+<rust>
+use inrux::prelude::*;
+/// The same typed component contract is compiled for every engine.
+pub struct Props {
+    pub label: &'static str,
+    pub count: u32,
+    pub doubled: u32,
+    pub on_increment: Emit<()>,
+}
+</rust>
+<style scoped>
+.label { width: 210px; height: 40px; padding: 8px; }
+.computed { width: 130px; height: 40px; padding: 8px; color: #58615e; }
+.increment { width: 128px; height: 40px; border-width: 0px; border-radius: 6px; background: #e4ebe7; color: #202825; }
+</style>

@@ -1,0 +1,19 @@
+[package]
+name = "inrux-compiler"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+inrux-style.workspace = true
+syn.workspace = true
+quote.workspace = true
+proc-macro2 = { workspace = true, features = ["span-locations"] }
+prettyplease = "0.2"
+unicode-width = "0.2"
+rust-lexer = { package = "ra-ap-rustc_lexer", version = "0.183" }
+serde_json = "1"
+
+[lints]
+workspace = true

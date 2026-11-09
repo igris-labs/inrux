@@ -1,0 +1,27 @@
+[package]
+name = "inrux-egui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+devtools = ["dep:inrux-devtools"]
+
+[dependencies]
+inrux-text.workspace = true
+ttf-parser = { version = "0.25", default-features = false, features = ["std"] }
+inrux-adapter = { workspace = true, features = ["taffy-layout"] }
+inrux-devtools = { path = "../inrux-devtools", optional = true }
+inrux-core.workspace = true
+inrux-style.workspace = true
+inrux-components.workspace = true
+eframe.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["NSApplication", "NSWindow", "NSColorSpace"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,11 @@
+/* Brand reference tokens; application styles remain opt-in. */
+:root {
+  --inrux-orange: #FF671D;
+  --inrux-ink: #111111;
+  --inrux-white: #FFFFFF;
+  --inrux-muted: #666666;
+  --inrux-line: #E5E5E5;
+  --inrux-orangeText: #B84200;
+  --inrux-font-body: "Noto Sans";
+  --inrux-font-code: "Noto Sans Mono";
+}

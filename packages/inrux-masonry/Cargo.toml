@@ -1,0 +1,28 @@
+[package]
+name = "inrux-masonry"
+version.workspace = true
+edition.workspace = true
+license = "MIT AND Apache-2.0"
+publish.workspace = true
+
+[dependencies]
+inrux-text.workspace = true
+inrux-adapter = { workspace = true, features = ["taffy-layout"] }
+inrux-components.workspace = true
+inrux-core.workspace = true
+inrux-style.workspace = true
+tracing = { version = "0.1", default-features = false, features = ["std"] }
+masonry = "=0.4.0"
+masonry_winit = "=0.4.0"
+# Naga 26 must match codespan termcolor when another renderer enables that shared feature.
+naga = { version = "26", default-features = false, features = ["termcolor"] }
+
+[build-dependencies]
+# Shader-build diagnostics need the same feature alignment on Cargo's host graph.
+naga = { version = "26", default-features = false, features = ["termcolor"] }
+
+[dev-dependencies]
+masonry = { version = "=0.4.0", features = ["testing"] }
+
+[lints]
+workspace = true

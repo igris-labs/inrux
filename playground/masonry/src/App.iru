@@ -1,0 +1,32 @@
+<view>
+    <ShowcaseLayout :engine={crate::engine::LABEL} :page={state.page} @navigate={navigate} :dark={state.theme.dark} @theme={crate::theme::toggle} :request={state.request} @top={crate::navigation::top} @end={crate::navigation::end}>
+        <If condition={state.page.example().is_some()}>
+            <ComponentPreview :example={state.page.example().unwrap_or(crate::catalogue::Example::Button)} :key={state.page.title()} />
+        </If>
+        <If condition={state.page == Page::Layout}><LayoutView /></If>
+        <If condition={state.page == Page::Controls}><ControlsView /></If>
+        <If condition={state.page == Page::Composition}><CompositionView /></If>
+        <If condition={state.page == Page::Background}><BackgroundView /></If>
+        <If condition={state.page == Page::LayoutMore}><LayoutMoreView /></If>
+        <If condition={state.page == Page::Content}><ContentView /></If>
+        <If condition={state.page == Page::Scrolling}><ScrollingView /></If>
+        <If condition={state.page == Page::Engine}><EngineView /></If>
+    </ShowcaseLayout>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::layouts::showcase_layout as ShowcaseLayout;
+use crate::views::{layout as LayoutView, layout_more as LayoutMoreView, content as ContentView, controls as ControlsView, composition as CompositionView, background as BackgroundView, engine as EngineView, scrolling as ScrollingView};
+use crate::views::component_preview as ComponentPreview;
+use crate::navigation::{navigate, Page};
+
+/// Root owns navigation; each mounted view owns its own demonstration state.
+#[derive(Clone)]
+pub struct State { pub page: Page, pub theme: crate::theme::Theme, pub request: ScrollRequest }
+
+/// Start with an interactive Button specimen.
+pub fn setup() -> State { State { page: Page::Example(crate::catalogue::Example::Button), theme: crate::theme::Theme::new(), request: ScrollRequest { revision: 0, offset: ScrollOffset::default() } } }
+
+/// Provide a typed application token without global mutable state.
+pub fn scope() -> Scope { Scope::default().provide(crate::features::composition::Accent(Color(29,112,98))) }
+</rust>

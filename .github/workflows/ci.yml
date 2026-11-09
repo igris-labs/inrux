@@ -1,0 +1,41 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Linux native backend dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libwayland-dev libgl1-mesa-dev libfontconfig1-dev libxkbcommon-x11-dev libxcb-xkb-dev libvulkan-dev libssl-dev pkg-config clang
+      - run: cargo fmt --all -- --check
+      - run: cargo test --workspace --all-features --locked
+      - run: python3 tooling/backend-check/check.py
+      - run: python3 tooling/playground-check/check.py
+      - run: cargo test -p inrux-adapter --no-default-features --locked
+      - run: cargo test -p inrux --no-default-features --locked
+      - run: cargo check -p inrux --no-default-features --features masonry --locked
+      - run: cargo check -p inrux --no-default-features --features gpui-runtime-shaders --locked
+      - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+  editor:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tooling/inrux-vscode
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tooling/inrux-vscode/package-lock.json
+      - run: npm ci
+      - run: npm run check

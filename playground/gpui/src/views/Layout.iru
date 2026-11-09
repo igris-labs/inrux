@@ -1,0 +1,56 @@
+<view>
+    <Box class="stack">
+        <DemoPanel title="Box, Container, Row and Spacer">
+            <Text text="Change the specimen width. The green container caps at 560px and centers inside it." class="muted" />
+            <Row :style={Style::new().wrap(true)} gap={8.0}>
+                <Button :text={if state.narrow { "Use wide specimen" } else { "Use narrow specimen" }} @click={toggle_width} class="button" />
+                <Button :text={if state.weighted { "Use equal spacers" } else { "Double the first spacer" }} @click={toggle_weight} class="button" />
+            </Row>
+            <Box :style={specimen_style(state.narrow)}>
+                <Container class="layout-container">
+                    <Row height={Size::Px(40.0)}>
+                        <Text text="Start" class="body" />
+                        <Spacer :style={Style::new().flex_grow(if state.weighted { 2.0 } else { 1.0 })} />
+                        <Text text="Middle" class="body" />
+                        <Spacer />
+                        <Text text="End" class="body" />
+                    </Row>
+                </Container>
+            </Box>
+        </DemoPanel>
+        <DemoPanel title="Column, Center and wrapping">
+            <Row :style={Style::new().wrap(true)} gap={16.0}>
+                <Column width={Size::Px(250.0)} height={Size::Px(130.0)} class="layout-tile">
+                    <Text text="Column with a vertical Spacer" class="body" />
+                    <Spacer />
+                    <Text text="Anchored at the bottom" class="muted" />
+                </Column>
+                <Center width={Size::Px(250.0)} height={Size::Px(130.0)} class="layout-tile">
+                    <Text text="Centered on both axes" class="body" />
+                </Center>
+            </Row>
+            <Row :style={Style::new().width(Size::Px(240.0)).gap(8.0).wrap(true)}>
+                <Text text="First" class="wrap-item" />
+                <Text text="Second" class="wrap-item" />
+                <Text text="Wrapped third item" class="wrap-item" />
+            </Row>
+            <Text text="These are physical layout nodes. Width constraints and wrapping work without breakpoints." class="muted" />
+        </DemoPanel>
+    </Box>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::components::demo_panel as DemoPanel;
+use crate::features::layout::{toggle_width, toggle_weight, specimen_style};
+#[derive(Clone)]
+pub struct Props {}
+#[derive(Clone)]
+pub struct State { pub props: Props, pub narrow: bool, pub weighted: bool }
+/// Local controls affect only this view's live specimens.
+pub fn setup(props: Props) -> State { State { props, narrow: false, weighted: false } }
+</rust>
+<style scoped>
+.layout-container { max-width: 560px; padding: 12px; background: #e4ebe7; border-radius: 6px; }
+.layout-tile { padding: 12px; background: #e4ebe7; border-radius: 6px; }
+.wrap-item { width: 150px; height: 30px; padding: 4px; background: #e4ebe7; }
+</style>

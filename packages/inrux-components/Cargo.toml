@@ -1,0 +1,13 @@
+[package]
+name = "inrux-components"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+inrux-core.workspace = true
+inrux-style.workspace = true
+
+[lints]
+workspace = true

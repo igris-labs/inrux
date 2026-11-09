@@ -1,0 +1,13 @@
+[package]
+name = "inrux-devtools"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+inrux-components.workspace = true
+eframe.workspace = true
+
+[lints]
+workspace = true

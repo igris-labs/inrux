@@ -1,0 +1,24 @@
+<view>
+    <Row class="retained-counter">
+        <Text :text={format!("{}: {}", state.props.label, state.counter.count.get())} width={Size::Px(110.0)} />
+        <Input model:value={state.note} class="input" placeholder="This edit follows its keyed row" width={Size::Px(320.0)} />
+        <Button text="Add one" @click={increment} class="button" />
+    </Row>
+</view>
+<rust>
+use inrux::prelude::*;
+use crate::composables::use_counter::{Counter, use_counter};
+/// Props are replaced without rebuilding the child's local state.
+#[derive(Clone)]
+pub struct Props { pub label: String }
+/// One independent state per keyed mount generation.
+#[derive(Clone)]
+pub struct State { pub props: Props, pub counter: Counter, pub note: String }
+/// Stateful children accept owned props at their initial mount.
+pub fn setup(props: Props) -> State { State { props, counter: use_counter(), note: String::new() } }
+/// Update this child through the root's bounded coordinator queue.
+fn increment(state: &mut State, _: &Context<State>) { state.counter.count.update(|count| *count += 1); }
+</rust>
+<style scoped>
+.retained-counter { gap: 8px; padding: 8px; background: #edf3f0; border-radius: 6px; }
+</style>

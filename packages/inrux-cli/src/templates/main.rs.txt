@@ -1,0 +1,9 @@
+mod composables;
+include!(concat!(env!("OUT_DIR"), "/inrux_app.rs"));
+/// Load application-global styles and mount the root on the native event loop.
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut styles = inrux_global_styles();
+    styles.extend(inrux::parse_css(include_str!("styles/global.css"))?);
+    inrux::mount_with_styles("My Inrux app", app::setup(), inrux::Scope::default(), styles)?;
+    Ok(())
+}

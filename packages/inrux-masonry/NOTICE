@@ -1,0 +1,8 @@
+The private input field, text-area and label modules are adapted from Masonry 0.4.0.
+Copyright 2018–2019 the Xilem Authors and the Druid Authors.
+SPDX-License-Identifier: Apache-2.0
+
+Inrux changes add single-line horizontal viewport state, caret reveal, translated
+pointer/IME/accessibility geometry, and focused module boundaries. Native Parley
+editing, selection, clipboard and IME behavior is retained. The Apache-2.0 license
+is included at ../../licenses/Apache-2.0.txt.
