@@ -56,4 +56,4 @@ jobs:
       - run: pnpm --dir docs install --frozen-lockfile
       - run: pnpm --dir docs test
       - run: pnpm --dir docs typecheck
-      - run: pnpm --dir docs generate
+      - run: pnpm --dir docs build

@@ -31,7 +31,7 @@ Write pages in `content/`. Numeric filename prefixes set navigation order and di
 ```sh
 pnpm --dir docs test
 pnpm --dir docs typecheck
-pnpm --dir docs generate
+pnpm --dir docs build
 ```
 
 To check the copy-and-run component examples, also run:
