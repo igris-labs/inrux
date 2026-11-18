@@ -2,27 +2,39 @@
     <Box class="stack">
         <DemoPanel title="Cancellable work without blocking input">
             <Text text="Start a three-second task. Edit the name or increment while progress advances." class="muted" />
-            <Input model:value={state.name} placeholder="Keep typing while the worker runs" class="input" />
+            <Input model:value={name} placeholder="Keep typing while the worker runs" class="input" />
             <Row :style={Style::new().wrap(true)} gap={8.0}>
-                <Button :text={if state.busy { "Working..." } else { "Run background task" }} @click={start_task} :disabled={state.busy} :style={primary_style(state.busy).width(Size::Px(210.0))} />
-                <Button width={Size::Px(140.0)} text="Cancel task" @click={cancel_task} :disabled={!state.busy} class="button" />
-                <Button :text={format!("Independent count: {}", state.count)} @click={increment} class="button" />
+                <Button :text={run_label} @click={start_task} :disabled={busy} :style={primary_style(busy.get()).width(Size::Px(210.0))} />
+                <Button width={Size::Px(140.0)} text="Cancel task" @click={cancel_task} :disabled={!busy.get()} class="button" />
+                <Button :text={format!("Independent count: {}", count)} @click={increment} class="button" />
             </Row>
-            <Text :text={format!("Progress: {}% | Completed tasks: {}", state.progress.get(), state.completed)} class="body" />
-            <Text :text={state.message.clone()} class="muted" />
+            <Text :text={format!("Progress: {}% | Completed tasks: {}", progress.get(), completed)} class="body" />
+            <Text :text={message.clone()} class="muted" />
             <Text text="Leaving this view disposes its state and cancels its owned work." class="muted" />
         </DemoPanel>
     </Box>
 </view>
 <rust>
-use inrux::prelude::*;
 use crate::components::demo_panel as DemoPanel;
-use crate::features::background::{start_task, cancel_task, increment};
+use crate::features::background::{cancel_task, increment, start_task};
 use crate::features::controls::primary_style;
+use inrux::prelude::*;
 #[derive(Clone)]
 pub struct Props {}
-#[derive(Clone)]
-pub struct State { pub props: Props, pub name: String, pub busy: bool, pub completed: u32, pub progress: Signal<u32>, pub task: Option<TaskHandle>, pub message: String, pub count: u32 }
-/// Each mount owns a new worker scope; navigation never revives completed state.
-pub fn setup(props: Props) -> State { State { props, name: "Inrux Workspace".into(), busy: false, completed: 0, progress: Signal::new(0), task: None, message: "Ready. Background work runs in the bounded task pool.".into(), count: 0 } }
+
+let busy: Signal<bool> = Signal::new(false);
+let run_label_busy = busy.clone();
+let run_label: Computed<&'static str> = Computed::new(move || {
+    if run_label_busy.get() {
+        "Working..."
+    } else {
+        "Run background task"
+    }
+});
+let name: String = "Inrux Workspace".into();
+let completed: u32 = 0;
+let progress: Signal<u32> = Signal::new(0);
+let task: Option<TaskHandle> = None;
+let message: String = "Ready. Background work runs in the bounded task pool.".into();
+let count: u32 = 0;
 </rust>

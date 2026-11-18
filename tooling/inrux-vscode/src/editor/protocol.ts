@@ -13,7 +13,18 @@ export interface PropInfo {
   documentation: string;
   range: Region;
 }
+export interface RustProjection {
+  code: string;
+  mappings: {
+    originalStart: number;
+    originalEnd: number;
+    generatedStart: number;
+    generatedEnd: number;
+  }[];
+}
 export interface DocumentInfo {
+  projection?: RustProjection;
+
   rust: Region;
   view: Region;
   styles: Region[];

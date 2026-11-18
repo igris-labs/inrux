@@ -57,4 +57,4 @@ cargo doc -p inrux-core --no-deps
 
 Tests cover ordering, saturation, cancellation, panic behavior, retained state, subscriptions and computed dependencies. Snapshot clones containing Signals/Instances share those handles; native rendering instead consumes owned Node descriptions.
 
-Render refs will reuse generational identity and cancellation while keeping native widget access on the UI thread. They are [not implemented yet](../../docs/STATUS.md); they are distinct from a Rust borrow or InstanceHandle.
+Render refs will reuse generational identity and cancellation while keeping native widget access on the UI thread. They are [not implemented yet](../../docs/content/1.getting-started/07.status.md); they are distinct from a Rust borrow or InstanceHandle.

@@ -7,5 +7,9 @@
 <rust>
 use inrux::prelude::*;
 /// A custom model is a typed value prop paired with its typed update event.
-pub struct Props { pub value: String, pub on_update_value: Emit<String>, pub on_confirmed: Emit<String> }
+pub struct Props {
+    pub value: String,
+    pub on_update_value: Emit<String>,
+    pub on_confirmed: Emit<String>,
+}
 </rust>

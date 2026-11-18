@@ -33,6 +33,6 @@ cargo test -p inrux-devtools --locked
 cargo check -p inrux-playground-egui --features inrux/devtools --locked
 ```
 
-A profiler, application-state debugger, event recorder, animation timeline and ref inspection are future capabilities. The [alpha status](../../docs/STATUS.md) requires the inspector to expose target identity and liveness without retaining unmounted widgets.
+A profiler, application-state debugger, event recorder, animation timeline and ref inspection are future capabilities. The [alpha status](../../docs/content/1.getting-started/07.status.md) requires the inspector to expose target identity and liveness without retaining unmounted widgets.
 
-The current inspector UI is egui-specific and is not a cross-engine profiler. Its optional dependency does not select egui for Masonry/GPUI applications. Under the [alpha status](../../docs/STATUS.md), compiler/inspection metadata remains engine-independent and presentation stays at the edge. Do not route build/editor tooling through the rendering adapter.
+The current inspector UI is egui-specific and is not a cross-engine profiler. Its optional dependency does not select egui for Masonry/GPUI applications. Under the [alpha status](../../docs/content/1.getting-started/07.status.md), compiler/inspection metadata remains engine-independent and presentation stays at the edge. Do not route build/editor tooling through the rendering adapter.

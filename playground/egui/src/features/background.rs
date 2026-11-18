@@ -7,10 +7,10 @@ pub fn increment(state: &mut State, _: &Context<State>) {
 }
 /// Publish progress from a cancellable worker while models keep updating on the coordinator.
 pub fn start_task(state: &mut State, context: &Context<State>) {
-    if state.busy {
+    if state.busy.get() {
         return;
     }
-    state.busy = true;
+    state.busy.set(true);
     state.progress.set(0);
     state.message = "Running. Name editing and counters remain available.".into();
     let progress = state.progress.clone();
@@ -29,7 +29,7 @@ pub fn start_task(state: &mut State, context: &Context<State>) {
             Ok(())
         },
         |state, result, _| {
-            state.busy = false;
+            state.busy.set(false);
             state.task = None;
             match result {
                 Ok(()) => {
@@ -42,7 +42,7 @@ pub fn start_task(state: &mut State, context: &Context<State>) {
     ) {
         Ok(task) => state.task = Some(task),
         Err(error) => {
-            state.busy = false;
+            state.busy.set(false);
             state.message = error.to_string();
         }
     }
@@ -52,6 +52,6 @@ pub fn cancel_task(state: &mut State, _: &Context<State>) {
     if let Some(task) = state.task.take() {
         task.cancel();
     }
-    state.busy = false;
+    state.busy.set(false);
     state.message = "Cancelled. Start again whenever you are ready.".into();
 }

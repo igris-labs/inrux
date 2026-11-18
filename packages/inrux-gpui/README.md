@@ -45,7 +45,7 @@ cargo check -p inrux --no-default-features --features gpui-runtime-shaders --loc
 python3 tooling/backend-check/check.py
 ```
 
-The optional runtime-shader flag is useful on this checkout's macOS host; omit it when testing precompiled shaders with the required compiler installed. GPUI's test-support feature is a development dependency, not a production default. Native harness tests cover pointer/keyboard activation, controlled checkbox updates/disabled state, retained keyed focus and remount disposal; pure tests cover disabled events, identities and unsupported selection controls. No startup/memory ranking or production parity claim is made. See [alpha status](../../docs/STATUS.md) and [validation](../../docs/STATUS.md).
+The optional runtime-shader flag is useful on this checkout's macOS host; omit it when testing precompiled shaders with the required compiler installed. GPUI's test-support feature is a development dependency, not a production default. Native harness tests cover pointer/keyboard activation, controlled checkbox updates/disabled state, retained keyed focus and remount disposal; pure tests cover disabled events, identities and unsupported selection controls. No startup/memory ranking or production parity claim is made. See [alpha status](../../docs/content/1.getting-started/07.status.md) and [validation](../../docs/content/1.getting-started/07.status.md).
 
 Upstream references: [GPUI 0.2.2 API](https://docs.rs/gpui/0.2.2/gpui/), [source and examples](https://docs.rs/crate/gpui/0.2.2/source/).
 
@@ -59,36 +59,36 @@ The native input binding in `widgets/input/{editing,platform,element}.rs` adapts
 
 ## Native-service evolution
 
-This binding currently uses common Taffy geometry with shared text measurement. The [alpha status](../../docs/STATUS.md) allows each service to delegate to this engine when it meets Inrux's contract, or use a suitable fallback when it does not. Layout/text provider interfaces are operational; this binding selects the optional Taffy fallback plus the shared `inrux-text` provider. Alternative native layout implementations, selective invalidation and complete incremental updates remain planned. Styling/component semantics stay in Inrux; native resources and execution stay private to the adapter. No native provider is assumed faster without comparable measurement.
+This binding currently uses common Taffy geometry with shared text measurement. The [alpha status](../../docs/content/1.getting-started/07.status.md) allows each service to delegate to this engine when it meets Inrux's contract, or use a suitable fallback when it does not. Layout/text provider interfaces are operational; this binding selects the optional Taffy fallback plus the shared `inrux-text` provider. Alternative native layout implementations, selective invalidation and complete incremental updates remain planned. Styling/component semantics stay in Inrux; native resources and execution stay private to the adapter. No native provider is assumed faster without comparable measurement.
 
 ## Input conformance increment
 
 Input now paints the common authored-radius focus outline, releases focus when disabled, and uses a weak-entity UI-thread caret timer: 500 ms half cycles, solid after ten idle seconds, reset on editing and cancelled on blur/removal. Active selection paint is limited to a focused active window. macOS Cmd+Left/Right and Shift variants select/navigate the line; Ctrl+Cmd+Space opens the native character palette. Clipboard and Unicode/preedit/reset cases, disabled focus and keyed input identity have native harness tests.
 
-`widgets/input/caret.rs` owns scheduling; `widgets/input/tests.rs` and `widgets/element/tests.rs` keep editing and retained-control test coverage modular. [The conformance matrix](../../docs/STATUS.md) records the limits; these tests do not establish all input methods or native accessibility support.
+`widgets/input/caret.rs` owns scheduling; `widgets/input/tests.rs` and `widgets/element/tests.rs` keep editing and retained-control test coverage modular. [The conformance matrix](../../docs/content/1.getting-started/07.status.md) records the limits; these tests do not establish all input methods or native accessibility support.
 
-`services.rs` reports Layout as a fallback and TextMeasurement as native, and leaves unfinished clip/scroll/focus-command/overlay contracts unavailable. The native layout path now calls the [common service interface](../../docs/ADAPTER-SERVICES.md); application components do not select providers. Only the required fallback feature is enabled by this binding.
+`services.rs` reports Layout as a fallback and TextMeasurement as native, and leaves unfinished clip/scroll/focus-command/overlay contracts unavailable. The native layout path now calls the [common service interface](../../docs/content/2.internals/02.adapter-services.md); application components do not select providers. Only the required fallback feature is enabled by this binding.
 
-Default enabled Button hover derives from its resolved background using the shared Inrux palette; disabled buttons keep their base fill. Checkbox focus remains visible on the square, without outlining its full label row. See [playground guide](../../docs/PLAYGROUNDS.md).
+Default enabled Button hover derives from its resolved background using the shared Inrux palette; disabled buttons keep their base fill. Checkbox focus remains visible on the square, without outlining its full label row. See [playground guide](../../docs/content/1.getting-started/05.playgrounds.md).
 
 ## Clipping and scrolling
 
-[ScrollArea and overflow usage](../../docs/SCROLLING.md) covers the shared component, CSS/Rust overflow, UI-owned offsets, typed observations and revision-bearing commands. Native bindings supply rectangular paint/input clipping and native focus/pointer operations; shared policy supplies scroll bounds, nested routing and scrollbar geometry. The Scrolling playground view exercises these paths. Virtualization and complete accessible scroll actions remain separate work.
+[ScrollArea and overflow usage](../../docs/content/5.components/scrolling-reference.md) covers the shared component, CSS/Rust overflow, UI-owned offsets, typed observations and revision-bearing commands. Native bindings supply rectangular paint/input clipping and native focus/pointer operations; shared policy supplies scroll bounds, nested routing and scrollbar geometry. The Scrolling playground view exercises these paths. Virtualization and complete accessible scroll actions remain separate work.
 
-Overflowing single-line Input supports retained horizontal gestures and caret reveal; vertical wheel input can reach its containing ScrollArea. See [behavior and native evidence](../../docs/SCROLLING.md#native-wheel-feel-and-overflowing-inputs).
+Overflowing single-line Input supports retained horizontal gestures and caret reveal; vertical wheel input can reach its containing ScrollArea. See [behavior and native evidence](../../docs/content/5.components/scrolling-reference.md#native-wheel-feel-and-overflowing-inputs).
 
-Input/TextInput are strictly single-line; TextArea provides multiline editing, wrapping and vertical caret scrolling on all three engines. See [text editing](../../docs/TEXT-EDITING.md) for `.iru`, Rust, model and styling usage.
+Input/TextInput are strictly single-line; TextArea provides multiline editing, wrapping and vertical caret scrolling on all three engines. See [text editing](../../docs/content/5.components/text-editing-reference.md) for `.iru`, Rust, model and styling usage.
 
 The repository Cargo root applies documented compatibility fixes for transitive `block` and `proc-macro-error2` releases. See [third-party patches](../../vendor/README.md), including the requirement to apply patches in the consuming Cargo root when using this unpublished crate from another workspace.
 
 ## Switch, ranges and control styling
 
-Switch, determinate Progress and bounded Meter share portable descriptors and work with all three engines. Inherited `accent-color` and independent `row-gap`/`column-gap` compile into typed styles. See [APIs, styling, validation and accessibility limits](../../docs/BOOLEAN-AND-RANGE-COMPONENTS.md) and [CSS support](../../docs/CSS-ENGINE.md). Native bindings remain private; only the selected engine is required.
+Switch, determinate Progress and bounded Meter share portable descriptors and work with all three engines. Inherited `accent-color` and independent `row-gap`/`column-gap` compile into typed styles. See [APIs, styling, validation and accessibility limits](../../docs/content/5.components/range-reference.md) and [CSS support](../../docs/content/4.styling/02.css-reference.md). Native bindings remain private; only the selected engine is required.
 
 ## Headless style foundation
 
-[Public parts and owner-state styles](../../docs/STYLING-PARTS.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../../docs/STYLE-COLORS.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.
+[Public parts and owner-state styles](../../docs/content/4.styling/03.parts-and-states.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../../docs/content/4.styling/04.colors.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.
 
 ## Shared typography
 
-All application text now uses the [common text provider](../inrux-text/README.md), including control labels, placeholders and editors. Native input/focus/clipboard/IME integration remains in this binding. [Typography integration](../../docs/TEXT-RENDERING.md) explains fractional metrics, glyph uploads, cache budgets and validation limits. Register application fonts before mounting; retain intrinsic family names in styles.
+All application text now uses the [common text provider](../inrux-text/README.md), including control labels, placeholders and editors. Native input/focus/clipboard/IME integration remains in this binding. [Typography integration](../../docs/content/2.internals/03.text-rendering.md) explains fractional metrics, glyph uploads, cache budgets and validation limits. Register application fonts before mounting; retain intrinsic family names in styles.

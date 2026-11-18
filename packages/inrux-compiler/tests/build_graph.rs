@@ -169,3 +169,42 @@ fn thousand_available_components_compile_only_fifty_imports() {
             .contains("item999")
     );
 }
+
+/// Implicit initialization must retain component imports and expose valid Rust to editors.
+#[test]
+fn implicit_graph_projects_retained_state_and_typed_child_props() {
+    let fixture = Fixture::new();
+    fixture.write(
+        "App.iru",
+        "<Child initial={state.count} />",
+        "use crate::components::child as Child;\nlet count: u32 = 2;",
+    );
+    fixture.write(
+        "components/Child.iru",
+        "<Text text={state.count} />",
+        "#[derive(Clone)] pub struct Props { pub initial: u32 }\nlet count: u32 = props.initial;",
+    );
+    inrux_compiler::build_app(fixture.0.join("src/App.iru"), fixture.0.join("output")).unwrap();
+    let map: serde_json::Value = serde_json::from_str(
+        &fs::read_to_string(fixture.0.join("output/inrux_app.map.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(map["mappings"].as_array().unwrap().len(), 2);
+    for entry in map["mappings"].as_array().unwrap() {
+        let generated = fs::read_to_string(entry["generated"].as_str().unwrap()).unwrap();
+        syn::parse_file(&generated).unwrap();
+        let original = entry["sourceText"].as_str().unwrap();
+        let body = entry["originalStart"].as_u64().unwrap() as usize;
+        for mapping in entry["projection"]["mappings"].as_array().unwrap() {
+            let range = |prefix: &str| {
+                mapping[format!("{prefix}Start")].as_u64().unwrap() as usize
+                    ..mapping[format!("{prefix}End")].as_u64().unwrap() as usize
+            };
+            let a = range("original");
+            assert_eq!(
+                &original[body + a.start..body + a.end],
+                &generated[range("generated")]
+            );
+        }
+    }
+}

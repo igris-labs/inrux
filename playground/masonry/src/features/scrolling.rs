@@ -18,7 +18,7 @@ pub fn end(state: &mut State, _: &Context<State>) {
 }
 /// Resize without replacing keyed controls or viewport state.
 pub fn resize(state: &mut State, _: &Context<State>) {
-    state.compact = !state.compact;
+    state.compact.set(!state.compact.get());
 }
 /// Store an observation without feeding it back as a scroll command.
 pub fn observe(state: &mut State, metrics: ScrollMetrics, _: &Context<State>) {

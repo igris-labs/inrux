@@ -6,7 +6,7 @@
             <Text :text={props.page.title()} class="breadcrumb-current" />
             <Spacer />
             <Badge :text={props.engine} class="engine-label" />
-            <Button :text={if props.dark { "Light theme" } else { "Dark theme" }} @click={props.on_theme.clone()} class="button" />
+            <Button :text={props.theme_label()} @click={props.on_theme.clone()} class="button" />
         </Row>
         <Row class="workspace-body">
             <Sidebar :page={props.page} @navigate={props.on_navigate.clone()} />
@@ -42,11 +42,35 @@
     </Column>
 </view>
 <rust>
-use inrux::prelude::*;
 use crate::components::sidebar as Sidebar;
+use inrux::prelude::*;
 /// Shared documentation chrome; events keep application navigation and theme ownership at the root.
 #[derive(Clone)]
-pub struct Props { pub engine: &'static str, pub page: crate::navigation::Page, pub dark: bool, pub on_theme: Emit<()>, pub on_top: Emit<()>, pub on_end: Emit<()>, pub request: ScrollRequest, pub on_navigate: Emit<crate::navigation::Page>, pub children: Node }
+pub struct Props {
+    pub engine: &'static str,
+    pub page: crate::navigation::Page,
+    pub dark: bool,
+    pub on_theme: Emit<()>,
+    pub on_top: Emit<()>,
+    pub on_end: Emit<()>,
+    pub request: ScrollRequest,
+    pub on_navigate: Emit<crate::navigation::Page>,
+    pub children: Node,
+}
+impl Props {
+    /// Derive the label from the latest parent props on each render.
+    fn theme_label(&self) -> &'static str {
+        if self.dark {
+            "Light theme"
+        } else {
+            "Dark theme"
+        }
+    }
+}
 /// Track logical viewport width; all hosts provide the same framework-owned handle.
-fn wide(scope: &Scope) -> bool { scope.inject::<inrux::ViewportState>().is_some_and(|viewport| viewport.get().width >= 1180.0) }
+fn wide(scope: &Scope) -> bool {
+    scope
+        .inject::<inrux::ViewportState>()
+        .is_some_and(|viewport| viewport.get().width >= 1180.0)
+}
 </rust>

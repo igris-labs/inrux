@@ -17,7 +17,7 @@ Noto Sans Regular and Noto Sans Mono are included under the SIL Open Font Licens
 - [Playground Noto Sans license](playground/egui/src/assets/fonts/OFL.txt).
 - [Playground Noto Sans Mono license](playground/egui/src/assets/fonts/NotoSansMono-OFL.txt).
 
-The other two playgrounds contain matching font assets and license copies. The brand wordmark and social graphics use outlines derived from Noto Sans; the brand kit includes the same font license notice. No system font files are redistributed by the kit.
+The other two playgrounds contain matching font assets and license copies. The documentation site also bundles these fonts with notices under `docs/public/fonts/`. The brand wordmark and social graphics use outlines derived from Noto Sans; the brand kit includes the same font license notice. No system font files are redistributed by the kit.
 
 ## Local upstream patches
 

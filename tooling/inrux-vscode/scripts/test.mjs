@@ -33,7 +33,7 @@ await writeFile(
 );
 await writeFile(
   join(fixture, "src/App.iru"),
-  `<view>\n<Column><Example title="Child" /><lower_panel title="Lowercase" /><Button text="Change" @click={change_name} /></Column>\n</view>\n<rust>\nuse inrux::prelude::*;\nuse crate::components::{example as Example, example as lower_panel};\n#[derive(Clone)]\npub struct State{ pub name:String }\npub fn setup()->State{State{name:String::new()}}\npub fn caption(name: &str) -> String { crate::helpers::label(name) }\npub fn change_name(state: &mut State, _: &Context<State>) { state.name = caption("Inrux"); }\npub fn example()->usize { let message=String::from("hello"); message.len() }\n</rust>\n<style scoped>\n.card{padding:12px;color:#123456;}\n</style>\n`,
+  `<view>\n<Column><Example title="Child" /><lower_panel title="Lowercase" /><Button text="Change" @click={change_name} /><Text text={name} /></Column>\n</view>\n<rust>\nuse inrux::prelude::*;\nuse crate::components::{example as Example, example as lower_panel};\nlet name:String=String::new();\npub fn caption(name: &str) -> String { crate::helpers::label(name) }\npub fn change_name(state: &mut State, _: &Context<State>) { state.name = caption("Inrux"); }\npub fn example()->usize { let message=String::from("hello"); message.len() }\n</rust>\n<style scoped>\n.card{padding:12px;color:#123456;}\n</style>\n`,
 );
 await writeFile(
   join(fixture, ".vscode/settings.json"),

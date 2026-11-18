@@ -1,0 +1,75 @@
+:root,
+.light {
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --accent: #b84200;
+  --accent-foreground: #ffffff;
+  --ring: #b84200;
+}
+.dark {
+  --accent: #ff8b52;
+  --accent-foreground: #111111;
+  --ring: #ff8b52;
+}
+.inrux-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.inrux-brand > img {
+  flex-shrink: 0;
+}
+.inrux-brand-dark {
+  display: none;
+}
+.dark .inrux-brand-light {
+  display: none;
+}
+.dark .inrux-brand-dark {
+  display: block;
+}
+.inrux-diagram {
+  margin: 1.5rem 0;
+}
+.inrux-diagram ol {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.inrux-diagram li {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.inrux-diagram strong {
+  display: block;
+}
+.inrux-diagram small {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.inrux-diagram figcaption {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.inrux-diagram li + li::before {
+  content: "↓";
+  display: block;
+  color: var(--accent);
+  margin-top: -1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Keep the leading slot and its Tabler glyph aligned at the same optical size. */
+[aria-label="Documentation navigation"] .akaza-navigation-menu-item-leading,
+[aria-label="Documentation navigation"]
+  .akaza-navigation-menu-item-leading
+  > .iconify {
+  width: 16px;
+  height: 16px;
+}

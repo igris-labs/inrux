@@ -12,8 +12,9 @@
 use crate::components::demo_panel as DemoPanel;
 #[derive(Clone)]
 pub struct Props {}
-#[derive(Clone)]
-pub struct State { pub props: Props, pub selected: String, pub select_disabled: bool, pub show_dialog: bool, pub heartbeat: bool }
-/// Native examples keep controlled models in the same view state contract.
-pub fn setup(props: Props) -> State { State { props, selected: "Balanced".into(), select_disabled: false, show_dialog: false, heartbeat: true } }
+
+let selected: String = "Balanced".into();
+let select_disabled: bool = false;
+let show_dialog: bool = false;
+let heartbeat: bool = true;
 </rust>

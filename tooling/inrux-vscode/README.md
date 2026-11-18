@@ -80,3 +80,7 @@ cargo test -p inrux-compiler -p inrux-language-server --locked
 ```
 
 The host test launches an isolated VS Code profile and temporary Cargo fixture with paths containing spaces. It uses the local VS Code app and installed rust-analyzer, without changing normal user settings. Set `INRUX_VSCODE_EXECUTABLE` for a different VS Code binary. Unit grammar checks currently use the macOS VS Code installation's bundled Rust/CSS grammars. [VS Code's embedded-language guide](https://code.visualstudio.com/api/language-extensions/embedded-languages) explains grammar/service separation; [rust-analyzer configuration](https://rust-analyzer.github.io/book/configuration) describes its Cargo integration.
+
+Implicit `<rust>` initialization is projected into the generated Cargo module, including typed state declarations and generated field navigation. Rebuild once after updating the compiler. Embedded Rust requests require a syntactically valid Rust block; framework syntax diagnostics remain available while editing incomplete code.
+
+Both `<rust>` (automatic setup) and `<rust explicit>` (manual State/setup) support formatting, Rust highlighting and Cargo-aware navigation. The closing tag is `</rust>` for both forms.

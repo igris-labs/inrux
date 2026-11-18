@@ -49,32 +49,32 @@ cargo test -p inrux-style --locked
 cargo doc -p inrux-style --no-deps
 ```
 
-Transitions, transform/opacity animation properties, DOM-inherited custom properties, container queries and richer grid tracks/placement are not implemented. Their animation/ref dependency is recorded in [alpha status](../../docs/STATUS.md); a handle alone will not imply renderer support for every CSS property.
+Transitions, transform/opacity animation properties, DOM-inherited custom properties, container queries and richer grid tracks/placement are not implemented. Their animation/ref dependency is recorded in [alpha status](../../docs/content/1.getting-started/07.status.md); a handle alone will not imply renderer support for every CSS property.
 
 ## Planned CSS growth
 
-The [alpha status](../../docs/STATUS.md) records class/ID selectors, specificity and cascade migration, public component parts, box/flex/grid/text/paint properties, tokens, media/container conditions and motion. See [the implemented CSS engine](../../docs/CSS-ENGINE.md) for the current support matrix, build-time standalone compilation, index/cascade APIs, measurements and remaining targets. IDs are distinct from classes, component refs and list keys.
+The [alpha status](../../docs/content/1.getting-started/07.status.md) records class/ID selectors, specificity and cascade migration, public component parts, box/flex/grid/text/paint properties, tokens, media/container conditions and motion. See [the implemented CSS engine](../../docs/content/4.styling/02.css-reference.md) for the current support matrix, build-time standalone compilation, index/cascade APIs, measurements and remaining targets. IDs are distinct from classes, component refs and list keys.
 
 ## Application fonts
 
 Register bundled TrueType/OpenType bytes with `WindowOptions.fonts.push(FontAsset::new("Noto Sans", bytes))`. Use the font's intrinsic family name in `Style::font_family("Noto Sans")` or CSS `font-family: "Noto Sans"`. The family inherits through the component tree and is used in measurement and paint. The current CSS subset accepts one named family, without a fallback list. See [shared playground](../../playground/README.md) for a complete licensed-font example.
 
-Style authoring and observable semantics remain in Inrux regardless of engine. The [alpha status](../../docs/STATUS.md) permits private native execution where conformant, with fallbacks for gaps. It does not transfer public styling ownership to an engine or imply that every planned CSS property is implemented.
+Style authoring and observable semantics remain in Inrux regardless of engine. The [alpha status](../../docs/content/1.getting-started/07.status.md) permits private native execution where conformant, with fallbacks for gaps. It does not transfer public styling ownership to an engine or imply that every planned CSS property is implemented.
 
-Display and FlexDirection are exported through the facade/prelude; grid column counts and ratios are validated before the provider allocates geometry. Ratio sizing and Grid display currently require physical containers. See [the layout contract](../../docs/LAYOUT-COMPONENTS.md#flex-grid-and-aspectratio).
+Display and FlexDirection are exported through the facade/prelude; grid column counts and ratios are validated before the provider allocates geometry. Ratio sizing and Grid display currently require physical containers. See [the layout contract](../../docs/content/5.components/layout-reference.md#flex-grid-and-aspectratio).
 
 ## Clipping and scrolling
 
-[ScrollArea and overflow usage](../../docs/SCROLLING.md) covers the shared component, CSS/Rust overflow, UI-owned offsets, typed observations and revision-bearing commands. Native bindings supply rectangular paint/input clipping and native focus/pointer operations; shared policy supplies scroll bounds, nested routing and scrollbar geometry. The Scrolling playground view exercises these paths. Virtualization and complete accessible scroll actions remain separate work.
+[ScrollArea and overflow usage](../../docs/content/5.components/scrolling-reference.md) covers the shared component, CSS/Rust overflow, UI-owned offsets, typed observations and revision-bearing commands. Native bindings supply rectangular paint/input clipping and native focus/pointer operations; shared policy supplies scroll bounds, nested routing and scrollbar geometry. The Scrolling playground view exercises these paths. Virtualization and complete accessible scroll actions remain separate work.
 
 ## Switch, ranges and control styling
 
-Switch, determinate Progress and bounded Meter share portable descriptors and work with all three engines. Inherited `accent-color` and independent `row-gap`/`column-gap` compile into typed styles. See [APIs, styling, validation and accessibility limits](../../docs/BOOLEAN-AND-RANGE-COMPONENTS.md) and [CSS support](../../docs/CSS-ENGINE.md). Native bindings remain private; only the selected engine is required.
+Switch, determinate Progress and bounded Meter share portable descriptors and work with all three engines. Inherited `accent-color` and independent `row-gap`/`column-gap` compile into typed styles. See [APIs, styling, validation and accessibility limits](../../docs/content/5.components/range-reference.md) and [CSS support](../../docs/content/4.styling/02.css-reference.md). Native bindings remain private; only the selected engine is required.
 
 ## Headless styling ownership
 
-Components own behavior, keyboard/pointer interaction and accessibility, with minimal overridable defaults. Application themes and visual recipes belong to the application; the showcase design stays in the playground. See the [accepted contract](../../docs/HEADLESS-COMPONENTS.md) for current native-part customization gaps and the [CSS guide](../../docs/CSS-ENGINE.md) for implemented styling. Unsupported CSS features remain explicit errors.
+Components own behavior, keyboard/pointer interaction and accessibility, with minimal overridable defaults. Application themes and visual recipes belong to the application; the showcase design stays in the playground. See the [accepted contract](../../docs/content/2.internals/04.headless-components.md) for current native-part customization gaps and the [CSS guide](../../docs/content/4.styling/02.css-reference.md) for implemented styling. Unsupported CSS features remain explicit errors.
 
 ## Headless style foundation
 
-[Public parts and owner-state styles](../../docs/STYLING-PARTS.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../../docs/STYLE-COLORS.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.
+[Public parts and owner-state styles](../../docs/content/4.styling/03.parts-and-states.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../../docs/content/4.styling/04.colors.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.

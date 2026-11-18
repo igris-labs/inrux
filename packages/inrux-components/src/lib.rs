@@ -25,4 +25,4 @@ pub use host::{ComponentHost, component_depth, component_key, component_scope, r
 mod handler;
 pub use handler::{Handler, NoPayload, WithPayload};
 mod binding;
-pub use binding::ModelValue;
+pub use binding::{ModelValue, ViewValue};

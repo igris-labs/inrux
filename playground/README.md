@@ -34,7 +34,7 @@ The individual specimens deliberately demonstrate Rust construction alongside th
 
 ## Checks
 
-Run `python3 tooling/playground-check/check.py` from the repository root to verify source/font parity and engine isolation. `src/tests.rs` in each app exercises all 21 component destinations, typed models, resets, remount disposal and retained integration behavior. egui also has native pointer/keyboard tests that scroll the sidebar before selecting hidden options. [playground guide](../docs/PLAYGROUNDS.md) document compact/larger layouts; see [validation](../docs/STATUS.md) for the checks and remaining platform limits.
+Run `python3 tooling/playground-check/check.py` from the repository root to verify source/font parity and engine isolation. `src/tests.rs` in each app exercises all 21 component destinations, typed models, resets, remount disposal and retained integration behavior. egui also has native pointer/keyboard tests that scroll the sidebar before selecting hidden options. [playground guide](../docs/content/1.getting-started/05.playgrounds.md) document compact/larger layouts; see [validation](../docs/content/1.getting-started/07.status.md) for the checks and remaining platform limits.
 
 The playground owns its application styles. It has no dependency on a separate design reference repository.
 
@@ -48,8 +48,8 @@ Sidebar spacing belongs to header, menu content and footer wrappers; the scrollp
 
 ## Headless styling ownership
 
-Components own behavior, keyboard/pointer interaction and accessibility, with minimal overridable defaults. Application themes and visual recipes belong to the application; the showcase design stays in the playground. See the [accepted contract](../docs/HEADLESS-COMPONENTS.md) for current native-part customization gaps and the [CSS guide](../docs/CSS-ENGINE.md) for implemented styling. Unsupported CSS features remain explicit errors.
+Components own behavior, keyboard/pointer interaction and accessibility, with minimal overridable defaults. Application themes and visual recipes belong to the application; the showcase design stays in the playground. See the [accepted contract](../docs/content/2.internals/04.headless-components.md) for current native-part customization gaps and the [CSS guide](../docs/content/4.styling/02.css-reference.md) for implemented styling. Unsupported CSS features remain explicit errors.
 
 ## Headless style foundation
 
-[Public parts and owner-state styles](../docs/STYLING-PARTS.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../docs/STYLE-COLORS.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.
+[Public parts and owner-state styles](../docs/content/4.styling/03.parts-and-states.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../docs/content/4.styling/04.colors.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.

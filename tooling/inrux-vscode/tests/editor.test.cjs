@@ -63,6 +63,14 @@ test("TextMate distinguishes lowercase tags, PascalCase components and embedded 
   scopes("<rust>", 2);
   const rust = scopes("pub fn answer() -> u32 { 42 }", 5);
   assert(rust.includes("source.rust"));
+  scopes("</rust>", 2);
+  assert(
+    scopes("<rust explicit>", 8).includes("entity.other.attribute-name.inrux"),
+  );
+  assert(
+    scopes("pub fn setup() -> State { State }", 5).includes("source.rust"),
+  );
+
   assert(rust.some((s) => s.includes("storage.type") || s.includes("keyword")));
   scopes("</rust>", 2);
   scopes("<style scoped>", 2);

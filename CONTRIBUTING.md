@@ -16,7 +16,7 @@ Inrux is early alpha. Bug reports, API feedback, reproducible native rendering/i
 
 ## Setup and checks
 
-Follow [getting started](docs/GETTING-STARTED.md) for native prerequisites. From the repository root:
+Follow [getting started](docs/content/1.getting-started/02.installation.md) for native prerequisites. From the repository root:
 
 ```sh
 cargo fmt --all -- --check
@@ -46,4 +46,4 @@ Keep behavioral tests meaningful: cover failure/lifetime boundaries and observab
 
 Explain the problem, resulting behavior and validation. Keep unrelated changes separate. Preserve third-party copyright/license notices when adapting upstream code. Original contributions are MIT-licensed under [LICENSE](LICENSE); third-party material retains the terms listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-The [architecture](docs/ARCHITECTURE.md), [authoring contract](docs/AUTHORING.md) and [current status](docs/STATUS.md) are the public references for review.
+The [architecture](docs/content/2.internals/01.architecture.md), [authoring contract](docs/content/3.authoring/02.component-contract.md) and [current status](docs/content/1.getting-started/07.status.md) are the public references for review.

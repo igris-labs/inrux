@@ -19,6 +19,27 @@ fn rustc(template: &str, source_type: &str) -> std::process::Output {
 }
 /// Check stylesheet IR construction in the same real Cargo facade context as generated components.
 fn rustc_with_css(template: &str, source_type: &str, css: &str) -> std::process::Output {
+    let rust = format!(
+        r#"
+use inrux::prelude::*;
+use crate::child as Child;
+#[derive(Clone)] pub struct State {{ pub value: {source_type} }}
+fn confirmed(_: &mut State, _: String, _: &Context<State>) {{}}
+pub mod child {{
+    use inrux::prelude::*;
+    pub struct Props {{ pub value: String, pub on_update_value: Emit<String>, pub on_confirmed: Emit<String> }}
+    pub fn view<P:Component>(_: Props, _: &Events<P>, _: &Scope) -> Node {{ Node::empty() }}
+}}
+"#
+    );
+    let source = format!(
+        "<template>\n{template}\n</template>\n<rust>\n{rust}\n</rust>\n<style scoped>\n{css}\n</style>\n"
+    );
+    check_source(&source, false)
+}
+
+/// Compile against this playground's facade and optionally run a headless test binary.
+pub(super) fn check_source(source: &str, execute: bool) -> std::process::Output {
     let dependencies = std::env::current_exe()
         .unwrap()
         .parent()
@@ -41,33 +62,39 @@ fn rustc_with_css(template: &str, source_type: &str, css: &str) -> std::process:
     ));
     fs::create_dir(&directory).unwrap();
     let fixture = Fixture(directory);
-    let rust = format!(
-        r#"
-use inrux::prelude::*;
-use crate::child as Child;
-#[derive(Clone)] pub struct State {{ pub value: {source_type} }}
-fn confirmed(_: &mut State, _: String, _: &Context<State>) {{}}
-pub mod child {{
-    use inrux::prelude::*;
-    pub struct Props {{ pub value: String, pub on_update_value: Emit<String>, pub on_confirmed: Emit<String> }}
-    pub fn view<P:Component>(_: Props, _: &Events<P>, _: &Scope) -> Node {{ Node::empty() }}
-}}
-"#
-    );
-    let source = format!(
-        "<template>\n{template}\n</template>\n<rust>\n{rust}\n</rust>\n<style scoped>\n{css}\n</style>\n"
-    );
-    let generated = inrux_compiler::compile(&source).unwrap();
+    let generated = inrux_compiler::compile(source).unwrap();
     let file = fixture.0.join("generated.rs");
     fs::write(&file, generated).unwrap();
-    Command::new("rustc")
-        .args([
-            "--edition=2024",
-            "--crate-type=lib",
-            "--crate-name=inrux_fixture",
-            "--emit=metadata",
-            "--cap-lints=allow",
-        ])
+    let mut command = Command::new("rustc");
+    command.args([
+        "--edition=2024",
+        "--crate-name=inrux_fixture",
+        "--cap-lints=allow",
+    ]);
+    if execute {
+        command.arg("--test");
+    } else {
+        command.args(["--crate-type=lib", "--emit=metadata"]);
+    }
+    // Executable fixtures need the native paths Cargo normally forwards to rustc.
+    if execute {
+        for entry in fs::read_dir(dependencies.parent().unwrap().join("build"))
+            .unwrap()
+            .filter_map(Result::ok)
+        {
+            if let Ok(output) = fs::read_to_string(entry.path().join("output")) {
+                for line in output.lines() {
+                    if let Some(path) = line
+                        .strip_prefix("cargo:rustc-link-search=")
+                        .or_else(|| line.strip_prefix("cargo::rustc-link-search="))
+                    {
+                        command.args(["-L", path]);
+                    }
+                }
+            }
+        }
+    }
+    let output = command
         .arg("--extern")
         .arg(format!("inrux={}", library.display()))
         .arg("-L")
@@ -76,7 +103,14 @@ pub mod child {{
         .arg(&fixture.0)
         .arg(file)
         .output()
-        .unwrap()
+        .unwrap();
+    if execute && output.status.success() {
+        Command::new(fixture.0.join("inrux_fixture"))
+            .output()
+            .unwrap()
+    } else {
+        output
+    }
 }
 /// Models support both plain Rust fields and signals; typed emitted payloads infer ordinary handlers.
 #[test]

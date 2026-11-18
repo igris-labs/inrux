@@ -6,15 +6,15 @@
                 <Row :style={Style::new().align_items(Align::Center)}>
                     <Text text="Workspace settings" class="section-title" />
                     <Spacer />
-                    <Badge :text={if state.name == state.saved_name { "Saved" } else { "Unsaved changes" }} :class={if state.name == state.saved_name { "saved-badge" } else { "pending-badge" }} />
+                    <Badge :text={save_status} :class={status_class} />
                 </Row>
                 <Separator />
-                <Input key="content-name" model:value={state.name} placeholder="Workspace name" class="input" />
+                <Input key="content-name" model:value={name} placeholder="Workspace name" class="input" />
                 <Row gap={12.0} :style={Style::new().align_items(Align::Center).wrap(true)}>
                     <Button text="Save card" @click={save} class="primary" />
                     <Button text="Reset card" @click={reset} class="button" />
                     <Separator vertical={true} height={Size::Px(30.0)} />
-                    <Text :text={format!("Saves: {}", state.saves)} class="body" />
+                    <Text :text={format!("Saves: {}", saves)} class="body" />
                 </Row>
             </Card>
         </DemoPanel>
@@ -42,22 +42,34 @@
     </Box>
 </view>
 <rust>
-use inrux::prelude::*;
 use crate::components::demo_panel as DemoPanel;
-use crate::features::content::{save, reset, custom_card, custom_badge, custom_line};
+use crate::features::content::{custom_badge, custom_card, custom_line, reset, save};
+use inrux::prelude::*;
 #[derive(Clone)]
 pub struct Props {}
-#[derive(Clone)]
-pub struct State {
-    pub props: Props,
-    pub name: String,
-    pub saved_name: String,
-    pub saves: u32,
-}
-/// Each visit owns a fresh in-memory example, with ordinary controlled input.
-pub fn setup(props: Props) -> State {
-    State { props, name: "Inrux Workspace".into(), saved_name: "Inrux Workspace".into(), saves: 0 }
-}
+
+let name: Signal<String> = Signal::new("Inrux Workspace".into());
+let saved_name: Signal<String> = Signal::new("Inrux Workspace".into());
+let save_status_name = name.clone();
+let save_status_saved_name = saved_name.clone();
+let save_status: Computed<&'static str> = Computed::new(move || {
+    if save_status_name.get() == save_status_saved_name.get() {
+        "Saved"
+    } else {
+        "Unsaved changes"
+    }
+});
+let status_class_name = name.clone();
+let status_class_saved_name = saved_name.clone();
+let status_class: Computed<&'static str> = Computed::new(move || {
+    if status_class_name.get() == status_class_saved_name.get() {
+        "saved-badge"
+    } else {
+        "pending-badge"
+    }
+});
+
+let saves: u32 = 0;
 </rust>
 <style scoped>
 .workspace-card { background: #ffffff; }

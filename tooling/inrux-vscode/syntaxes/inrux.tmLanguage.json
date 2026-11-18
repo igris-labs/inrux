@@ -22,7 +22,7 @@
     },
     "rust-block": {
       "name": "meta.block.rust.inrux",
-      "begin": "^\\s*(<)(rust)(>)\\s*$",
+      "begin": "^\\s*(<)(rust)(?:\\s+(explicit))?(>)\\s*$",
       "beginCaptures": {
         "1": {
           "name": "punctuation.definition.tag.begin.inrux"
@@ -31,6 +31,9 @@
           "name": "entity.name.tag.inrux"
         },
         "3": {
+          "name": "entity.other.attribute-name.inrux"
+        },
+        "4": {
           "name": "punctuation.definition.tag.end.inrux"
         }
       },

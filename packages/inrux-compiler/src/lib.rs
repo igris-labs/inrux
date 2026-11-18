@@ -1,8 +1,9 @@
 //! Build-time `.iru` compilation into Rust, with original-source syntax diagnostics.
 //!
-//! Embedded Rust is authored inside `<rust>...</rust>`. This compiler
+//! Embedded Rust uses automatic `<rust>` or manual `<rust explicit>` initialization. This compiler
 //! checks framework syntax; rustc subsequently checks Rust expression and property types.
 #![deny(missing_docs)]
+mod bindings;
 mod build;
 mod codegen;
 mod controls;
@@ -13,6 +14,7 @@ mod format;
 mod imports;
 pub use build::{BuildOutput, build_app};
 pub use format::format_source;
+mod rust_block;
 mod schema;
 mod sfc;
 mod source;
@@ -49,8 +51,12 @@ pub fn compile_source(source: SourceFile) -> Result<String, CompileError> {
             error.to_string(),
         )
     };
-    let rust = syn::parse_file(&source.text()[blocks.rust.body.clone()])
-        .map_err(|e| parse_error(e, Phase::Rust, "INRUX101", blocks.rust.body.clone()))?;
+    let rust = rust_block::parse(
+        &source.text()[blocks.rust.body.clone()],
+        blocks.rust.explicit,
+    )
+    .map_err(|e| parse_error(e, Phase::Rust, "INRUX101", blocks.rust.body.clone()))?
+    .file;
     let stateful = rust
         .items
         .iter()
@@ -70,8 +76,9 @@ pub fn compile_source(source: SourceFile) -> Result<String, CompileError> {
         )
         .with_help("Put the component's Rust declarations inside the <rust> block."));
     }
-    let tree = syn::parse_str::<Element>(&source.text()[blocks.view.body.clone()])
+    let mut tree = syn::parse_str::<Element>(&source.text()[blocks.view.body.clone()])
         .map_err(|e| parse_error(e, Phase::Template, "INRUX201", blocks.view.body.clone()))?;
+    bindings::resolve(&mut tree, &rust);
     tree.validate()
         .map_err(|e| parse_error(e, Phase::Validation, "INRUX202", blocks.view.body.clone()))?;
     imports::validate(&tree, &imports::imports(&rust))

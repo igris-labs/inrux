@@ -55,8 +55,8 @@ impl Element {
             }
             "Card" => quote!(::inrux::Node::card(vec![#(#children),*])),
             "Badge" => {
-                let text = self.text();
-                quote!(::inrux::Node::badge((#text).to_string()))
+                let text = self.text_value();
+                quote!(::inrux::Node::badge(#text))
             }
             "Separator" => {
                 let vertical = self
@@ -100,8 +100,8 @@ impl Element {
             "Column" => quote!(::inrux::Node::column(vec![#(#children),*])),
             "Row" => quote!(::inrux::Node::row(vec![#(#children),*])),
             "Text" => {
-                let text = self.text();
-                quote!(::inrux::Node::text((#text).to_string()))
+                let text = self.text_value();
+                quote!(::inrux::Node::text(#text))
             }
             "Button" => self.button(stateful, actions),
             "Input" | "TextInput" | "TextArea" => {
@@ -238,9 +238,23 @@ impl Element {
             .unwrap_or_else(|| syn::parse_quote!(""))
     }
 
+    /// Direct text reads already return String and must not allocate a second copy.
+    fn text_value(&self) -> TokenStream {
+        let text = self.text();
+        if self
+            .attrs
+            .iter()
+            .any(|attr| attr.name.trim_start_matches(':') == "text" && attr.owned_text)
+        {
+            quote!(#text)
+        } else {
+            quote!((#text).to_string())
+        }
+    }
+
     /// Generate a typed button event; stateless children forward their provided event handle.
     fn button(&self, stateful: bool, actions: bool) -> TokenStream {
-        let text = self.text();
+        let text = self.text_value();
         let callback = match self.attr("@click") {
             Some(expr) if stateful && actions => quote!(Some(events.action(#expr))),
             Some(expr) if stateful => quote!(Some(events.handler(#expr))),
@@ -251,7 +265,7 @@ impl Element {
             .attr("disabled")
             .cloned()
             .unwrap_or_else(|| syn::parse_quote!(false));
-        quote!(::inrux::Node::button((#text).to_string(), #callback).disabled(#disabled))
+        quote!(::inrux::Node::button(#text, #callback).disabled(#disabled))
     }
 
     /// Resolve custom tags through the exact explicit Rust import binding.
@@ -273,17 +287,11 @@ impl Element {
             if let Some(model) = attr.name.strip_prefix("model:") {
                 let binding = &attr.value;
                 let invalid = || {
-                    self.attribute_error(&attr.name, "Component model requires a direct state.field binding on a stateful parent")
+                    self.attribute_error(&attr.name, "Component model requires a retained field such as name or counter.name on a stateful parent")
                 };
-                let Expr::Field(field) = binding else {
-                    return Err(invalid());
-                };
-                if !stateful
-                    || !matches!(field.base.as_ref(), Expr::Path(base) if base.path.is_ident("state"))
-                {
+                if !stateful || !crate::bindings::model_target(binding) {
                     return Err(invalid());
                 }
-                let member = &field.member;
                 let name = syn::parse_str::<Ident>(model)?;
                 let event = syn::parse_str::<Ident>(&format!(
                     "on_update_{}",
@@ -293,12 +301,12 @@ impl Element {
                     self.attribute_error(&attr.name, "Invalid component model event name")
                 })?;
                 fields.push(quote!(#name: ::inrux::ModelValue::model_value(&#binding)));
-                let setter = quote!(|state: &mut State, value, _context: &::inrux::Context<State>| ::inrux::ModelValue::set_model_value(&mut state.#member, value));
+                let setter = quote!(|state: &mut State, value, _context: &::inrux::Context<State>| ::inrux::ModelValue::set_model_value(&mut #binding, value));
                 // The setter and update listener share one command, so a frame
                 // cannot publish a new value with the old validation/dirty state.
                 let event_value = match self.attr(&format!("@update:{model}")) {
                     Some(handler) if actions => quote!(events.model(|state, value, context| {
-                        ::inrux::ModelValue::set_model_value(&mut state.#member, value);
+                        ::inrux::ModelValue::set_model_value(&mut #binding, value);
                         <State as ::inrux::Component>::update(state, #handler, context);
                     })),
                     Some(handler) => quote!(events.model_with_handler(#setter, #handler)),
@@ -441,6 +449,7 @@ pub(crate) fn component(
     } else {
         quote!()
     };
+    let props_binding = has_props.then(|| quote!(let props = &self.props; let _ = props;));
     let implementation = if stateful {
         quote! {
             impl ::inrux::Component for State {
@@ -448,6 +457,7 @@ pub(crate) fn component(
                 fn update(&mut self, action: Self::Action, context: &::inrux::Context<Self>) { #update }
                 fn view(&self, events: &::inrux::Events<Self>, scope: &::inrux::Scope) -> ::inrux::Node {
                     let state = self;
+                    #props_binding
                     let _ = (state, events, scope);
                     #tree
                 }

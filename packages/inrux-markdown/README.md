@@ -17,16 +17,12 @@ Keep the document in component State or a cached load result. Cloning the docume
 
 ```xml
 <view>
-    <Markdown :document={state.documentation.clone()} />
+    <Markdown :document={documentation.clone()} />
 </view>
 <rust>
 use inrux::markdown::Markdown;
-#[derive(Clone)]
-pub struct State { pub documentation: Markdown }
-/// Parse the static document once per component mount.
-pub fn setup() -> State {
-    State { documentation: Markdown::parse("# Workspace\n\nNative documentation.") }
-}
+
+let documentation: Markdown = Markdown::parse("# Workspace\n\nNative documentation.");
 </rust>
 ```
 

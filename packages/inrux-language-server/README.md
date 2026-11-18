@@ -37,7 +37,7 @@ cargo test -p inrux-compiler --locked
 
 Tests include a real subprocess handshake, unsaved diagnostics, formatting and shutdown, plus Unicode coordinate cases. They do not constitute a VS Code extension-host test.
 
-The VS Code client now adds Rust completion/hover/definition/signature forwarding and view/CSS formatting; the Rust server itself remains focused on compiler metadata, syntax diagnostics and rustfmt. Complete type-diagnostic parity, rename/refactors and compatible reload remain future work. Named content, render functions and NodeRef capabilities must reuse compiler metadata when delivered; their [alpha status](../../docs/STATUS.md) is not an advertised server feature today.
+The VS Code client now adds Rust completion/hover/definition/signature forwarding and view/CSS formatting; the Rust server itself remains focused on compiler metadata, syntax diagnostics and rustfmt. Complete type-diagnostic parity, rename/refactors and compatible reload remain future work. Named content, render functions and NodeRef capabilities must reuse compiler metadata when delivered; their [alpha status](../../docs/content/1.getting-started/07.status.md) is not an advertised server feature today.
 
 ## VS Code authoring integration
 

@@ -32,4 +32,4 @@ Run `cargo test -p inrux-text --locked`. The opt-in provider timing fixture is:
 cargo test -p inrux-text --release shared_text_cache_timing --locked -- --ignored --nocapture
 ```
 
-It measures provider work, excluding native upload and presentation. See [framework integration and limits](../../docs/TEXT-RENDERING.md). Shared glyph pixels do not guarantee identical compositor output on every platform, and native editor IME/accessibility integration still requires platform testing.
+It measures provider work, excluding native upload and presentation. See [framework integration and limits](../../docs/content/2.internals/03.text-rendering.md). Shared glyph pixels do not guarantee identical compositor output on every platform, and native editor IME/accessibility integration still requires platform testing.

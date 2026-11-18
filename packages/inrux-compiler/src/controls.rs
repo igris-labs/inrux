@@ -2,7 +2,6 @@
 use crate::view::Element;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::Expr;
 impl Element {
     /// Generate controlled input wiring, keeping each model setter and input action atomic.
     pub(crate) fn input(&self, stateful: bool, actions: bool) -> syn::Result<TokenStream> {
@@ -25,7 +24,7 @@ impl Element {
             let invalid = || {
                 self.attribute_error(
                     "model:value",
-                    "model:value requires a direct state.field binding on a stateful component",
+                    "model:value requires a retained field such as name or counter.name on a stateful component",
                 )
             };
             if !stateful {
@@ -34,16 +33,9 @@ impl Element {
             if self.attr("value").is_some() {
                 return Err(self.attribute_error("value", "Use either model:value or value"));
             }
-            let Expr::Field(field) = binding else {
-                return Err(invalid());
-            };
-            let Expr::Path(base) = field.base.as_ref() else {
-                return Err(invalid());
-            };
-            if !base.path.is_ident("state") || !matches!(field.member, syn::Member::Named(_)) {
+            if !crate::bindings::model_target(binding) {
                 return Err(invalid());
             }
-            let member = &field.member;
             let action = self.attr("@input").map(|action| {
                 if actions {
                     quote!(<State as ::inrux::Component>::update(state, #action, _context);)
@@ -54,7 +46,7 @@ impl Element {
             let position = self.tag.span().start();
             let id = format!("{}:{}", position.line, position.column);
             Ok(
-                quote!(::inrux::Node::#model(::inrux::ModelValue::<String>::model_value(&#binding), (#placeholder).to_string(), events.model_versioned(concat!(module_path!(), ":", #id), |state, value, _context| { ::inrux::ModelValue::set_model_value(&mut state.#member, value); #action }))),
+                quote!(::inrux::Node::#model(::inrux::ModelValue::<String>::model_value(&#binding), (#placeholder).to_string(), events.model_versioned(concat!(module_path!(), ":", #id), |state, value, _context| { ::inrux::ModelValue::set_model_value(&mut #binding, value); #action }))),
             )
         } else {
             let value = self.required("value")?;
@@ -114,21 +106,12 @@ impl Element {
             if self.attr(value_name).is_some() {
                 return Err(self.attribute_error(value_name, "Use either a model or a value"));
             }
-            let Expr::Field(field) = binding else {
-                return Err(
-                    self.attribute_error(model_name, "Model requires a direct state.field binding")
-                );
-            };
-            let valid = stateful
-                && matches!(field.base.as_ref(), Expr::Path(base) if base.path.is_ident("state"))
-                && matches!(field.member, syn::Member::Named(_));
-            if !valid {
+            if !stateful || !crate::bindings::model_target(binding) {
                 return Err(self.attribute_error(
                     model_name,
-                    "Model requires a direct state.field binding on a stateful component",
+                    "Model requires a retained state field; props are readonly",
                 ));
             }
-            let member = &field.member;
             let callback = self.attr("@change").map(|handler| {
                 if actions {
                     quote!(<State as ::inrux::Component>::update(state, #handler, _context);)
@@ -142,7 +125,7 @@ impl Element {
                 } else {
                     quote!(::inrux::ModelValue::<String>::model_value(&#binding))
                 },
-                quote!(events.model(|state, value, _context| { ::inrux::ModelValue::set_model_value(&mut state.#member, value); #callback })),
+                quote!(events.model(|state, value, _context| { ::inrux::ModelValue::set_model_value(&mut #binding, value); #callback })),
             ))
         } else {
             let value = self.required(value_name)?;

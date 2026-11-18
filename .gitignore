@@ -10,3 +10,12 @@ tooling/inrux-vscode/out/
 /internal/
 /plans/
 **/__pycache__/
+
+# Nuxt documentation build output.
+/docs/.nuxt/
+/docs/.output/
+/docs/.data/
+/docs/.cache/
+/docs/.nitro/
+
+/docs/dist

@@ -43,3 +43,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 mod tests;
 #[cfg(test)]
 mod typecheck;
+
+#[cfg(test)]
+mod binding_tests;

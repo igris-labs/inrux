@@ -17,6 +17,8 @@ pub struct EditorDocument {
     pub bindings: BTreeMap<String, Range<usize>>,
     /// Public fields declared by this component in its Props struct.
     pub props: BTreeMap<String, EditorProp>,
+    /// Valid Rust module projection and reversible authored-byte mappings.
+    pub projection: Option<serde_json::Value>,
 }
 
 /// A public authored Props field, including the Rust type and declaration location.
@@ -52,8 +54,16 @@ pub fn builtin_attributes() -> BTreeMap<String, Vec<String>> {
 pub fn editor_document(source: SourceFile) -> Result<EditorDocument, CompileError> {
     let source = Arc::new(source);
     let blocks = sfc::parse(&source)?;
-    let rust = syn::parse_file(&source.text()[blocks.rust.body.clone()]).ok();
-    let imports = rust.as_ref().map(imports::imports).unwrap_or_default();
+    let parsed = crate::rust_block::parse(
+        &source.text()[blocks.rust.body.clone()],
+        blocks.rust.explicit,
+    )
+    .ok();
+    let rust = parsed.as_ref().map(|parsed| &parsed.file);
+    let imports = rust
+        .as_ref()
+        .map(|file| imports::imports(file))
+        .unwrap_or_default();
     let mut bindings = BTreeMap::new();
     let mut props = BTreeMap::new();
     if let Some(rust) = &rust {
@@ -101,6 +111,24 @@ pub fn editor_document(source: SourceFile) -> Result<EditorDocument, CompileErro
         }
     }
     if let Some(rust) = &rust {
+        for owner in ["Props", "State"] {
+            for item in &rust.items {
+                if let syn::Item::Struct(item) = item
+                    && item.ident == owner
+                {
+                    for field in &item.fields {
+                        if let Some(ident) = &field.ident {
+                            bindings.insert(
+                                ident.to_string(),
+                                source.parser_range(blocks.rust.body.clone(), ident.span()),
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if let Some(rust) = &rust {
         let mut identifiers = Vec::new();
         for item in &rust.items {
             match item {
@@ -120,6 +148,14 @@ pub fn editor_document(source: SourceFile) -> Result<EditorDocument, CompileErro
             );
         }
     }
+    if let Some(parsed) = &parsed {
+        for ident in &parsed.bindings {
+            bindings.insert(
+                ident.to_string(),
+                source.parser_range(blocks.rust.body.clone(), ident.span()),
+            );
+        }
+    }
     Ok(EditorDocument {
         rust: blocks.rust.body,
         view: blocks.view.body,
@@ -131,6 +167,7 @@ pub fn editor_document(source: SourceFile) -> Result<EditorDocument, CompileErro
         imports,
         bindings,
         props,
+        projection: parsed.map(|parsed| parsed.projection),
     })
 }
 

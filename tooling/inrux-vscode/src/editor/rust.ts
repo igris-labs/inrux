@@ -5,10 +5,11 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { LanguageClient } from "vscode-languageclient/node";
 import * as protocol from "vscode-languageserver-protocol";
-import { documentInfo, range } from "./protocol";
+import { documentInfo, range, RustProjection } from "./protocol";
 import { tagNameAt } from "./navigation";
 
 interface SourceMap {
+  projection?: RustProjection;
   generated?: string;
   source: string;
   sourceText: string;
@@ -225,6 +226,7 @@ export class RustSupport implements vscode.Disposable {
         text += base.slice(cursor, start);
         const open = opened.find((open) => open.path === item.source)?.doc;
         const sourceUri = open?.uri ?? vscode.Uri.file(item.source);
+        let projection = item.projection;
         let sourceText = item.sourceText,
           originalStart = byteOffset(sourceText, item.originalStart),
           body = sourceText.slice(
@@ -236,16 +238,37 @@ export class RustSupport implements vscode.Disposable {
           sourceText = open.getText();
           originalStart = open.offsetAt(range(info.rust).start);
           body = open.getText(range(info.rust));
+          if (!info.projection) {
+            throw new Error(
+              "Embedded Rust: fix the Rust syntax diagnostic before requesting Rust features",
+            );
+          }
+          projection = info.projection;
         }
         const generatedStart = text.length;
-        text += body;
-        segments.push({
-          uri: sourceUri,
-          sourceText,
-          originalStart,
-          generatedStart,
-          generatedEnd: text.length,
-        });
+        text += projection?.code ?? body;
+        const projected = projection?.mappings ?? [
+          {
+            originalStart: 0,
+            originalEnd: Buffer.byteLength(body),
+            generatedStart: 0,
+            generatedEnd: Buffer.byteLength(body),
+          },
+        ];
+        for (const mapping of projected) {
+          segments.push({
+            uri: sourceUri,
+            sourceText,
+            originalStart:
+              originalStart + byteOffset(body, mapping.originalStart),
+            generatedStart:
+              generatedStart +
+              byteOffset(projection?.code ?? body, mapping.generatedStart),
+            generatedEnd:
+              generatedStart +
+              byteOffset(projection?.code ?? body, mapping.generatedEnd),
+          });
+        }
         cursor = end;
       }
       text += base.slice(cursor);
@@ -356,9 +379,18 @@ export class RustSupport implements vscode.Disposable {
     const projection = await this.prepare(doc);
     if (!projection || version !== doc.version || token.isCancellationRequested)
       return;
-    const segment = projection.segments.find(
-      (item) => item.uri.toString() === doc.uri.toString(),
-    )!;
+    const originalOffset = doc.offsetAt(query);
+    // A declaration can map to both a generated field and its initializer; prefer the initializer.
+    const segment = [...projection.segments]
+      .reverse()
+      .find(
+        (item) =>
+          item.uri.toString() === doc.uri.toString() &&
+          originalOffset >= item.originalStart &&
+          originalOffset <
+            item.originalStart + item.generatedEnd - item.generatedStart,
+      );
+    if (!segment) return;
     const position = positionAt(
       projection.text,
       segment.generatedStart + doc.offsetAt(query) - segment.originalStart,

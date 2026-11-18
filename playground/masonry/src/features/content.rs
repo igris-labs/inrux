@@ -4,13 +4,13 @@ use inrux::{Color, Context, Size, Style};
 
 /// Save in memory; no I/O or framework-specific component behavior is involved.
 pub fn save(state: &mut State, _: &Context<State>) {
-    state.saved_name.clone_from(&state.name);
+    state.saved_name.set(state.name.get());
     state.saves += 1;
 }
 
 /// Restore the last saved value through the normal controlled input model.
 pub fn reset(state: &mut State, _: &Context<State>) {
-    state.name.clone_from(&state.saved_name);
+    state.name.set(state.saved_name.get());
 }
 
 /// Match the CSS example while leaving the framework's component defaults overridable.

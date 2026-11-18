@@ -46,3 +46,6 @@ mod typecheck;
 
 #[cfg(test)]
 mod native_tests;
+
+#[cfg(test)]
+mod binding_tests;

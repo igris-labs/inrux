@@ -48,16 +48,25 @@ pub fn build_app(entry: impl AsRef<Path>, output: impl AsRef<Path>) -> Result<Bu
         let compiled = compile_source((*source).clone())?;
         let blocks = sfc::parse(&source)?;
         let original = &source.text()[blocks.rust.body.clone()];
-        let rust = syn::parse_file(original)?;
+        let parsed = crate::rust_block::parse(original, blocks.rust.explicit)?;
+        let rust = parsed.file;
         // Preserve authored bytes for IDE mappings instead of guessing through pretty-print changes.
         let prefix = prettyplease::unparse(&rust);
         let suffix = compiled
             .strip_prefix(&prefix)
             .ok_or("Cannot map generated Rust prefix")?;
-        let compiled = format!("{original}\n{suffix}");
+        let projected = parsed.projection["code"]
+            .as_str()
+            .ok_or("Missing Rust projection")?;
+        let compiled = format!("{projected}\n{suffix}");
         metadata.insert(
             module.clone(),
-            (path.clone(), source.text().to_owned(), blocks.rust.body),
+            (
+                path.clone(),
+                source.text().to_owned(),
+                blocks.rust.body,
+                parsed.projection,
+            ),
         );
         for import in imports::imports(&rust).into_values() {
             let resolved = resolve(&module, &import);
@@ -85,10 +94,10 @@ pub fn build_app(entry: impl AsRef<Path>, output: impl AsRef<Path>) -> Result<Bu
     fs::write(&bootstrap, body)?;
     let mappings: Vec<_> = metadata
         .into_iter()
-        .map(|(module, (source, text, range))| {
+        .map(|(module, (source, text, range, projection))| {
             serde_json::json!({"source":source,"sourceText":text,"originalStart":range.start,
             "originalEnd":range.end,"generated":module_files[&module],"generatedStart":0,
-            "generatedEnd":range.len()})
+            "generatedEnd":projection["code"].as_str().map(str::len),"projection":projection})
         })
         .collect();
     fs::write(

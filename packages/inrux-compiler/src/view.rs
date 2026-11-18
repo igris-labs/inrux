@@ -11,6 +11,7 @@ pub(crate) struct Attribute {
     pub(crate) name: String,
     pub(crate) value: Expr,
     pub(crate) span: Span,
+    pub(crate) owned_text: bool,
 }
 /// One component/primitive node with scoped child nodes.
 pub(crate) struct Element {
@@ -74,7 +75,12 @@ impl Element {
                     lit: syn::Lit::Str(input.parse::<LitStr>()?),
                 })
             };
-            attrs.push(Attribute { name, value, span });
+            attrs.push(Attribute {
+                name,
+                value,
+                span,
+                owned_text: false,
+            });
         }
         if input.peek(Token![/]) {
             input.parse::<Token![/]>()?;

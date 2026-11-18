@@ -42,7 +42,7 @@ fn document_info(
     let range = |range: std::ops::Range<usize>| json!({"start":position(text, range.start),"end":position(text, range.end)});
     Ok(
         json!({"rust":range(info.rust),"view":range(info.view),"styles":info.styles.into_iter().map(range).collect::<Vec<_>>(),"imports":info.imports,
-            "builtins":builtin_attributes(),
+            "builtins":builtin_attributes(),"projection":info.projection,
             "props":info.props.into_iter().map(|(name,prop)|(name,json!({"type":prop.rust_type,"documentation":prop.documentation,"range":range(prop.range)}))).collect::<std::collections::BTreeMap<_,_>>(),
             "bindings":info.bindings.into_iter().map(|(name, span)|(name,range(span))).collect::<std::collections::BTreeMap<_,_>>()}),
     )

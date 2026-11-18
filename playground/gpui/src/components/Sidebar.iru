@@ -18,5 +18,8 @@
 <rust>
 use inrux::prelude::*;
 /// Content spacing belongs to header/menu/footer, leaving the scrollbar on the pane edge.
-pub struct Props { pub page: crate::navigation::Page, pub on_navigate: Emit<crate::navigation::Page> }
+pub struct Props {
+    pub page: crate::navigation::Page,
+    pub on_navigate: Emit<crate::navigation::Page>,
+}
 </rust>

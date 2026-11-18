@@ -229,7 +229,7 @@ export async function run(): Promise<void> {
   change.set(uri, edits);
   await vscode.workspace.applyEdit(change);
   assert(doc.getText().includes("    <Column>\n        <Example"));
-  assert(doc.getText().includes("pub struct State {"));
+  assert(doc.getText().includes("let name: String = String::new();"));
   assert(doc.getText().includes("padding: 12px;"));
   const second = await vscode.commands.executeCommand<vscode.TextEdit[]>(
     "vscode.executeFormatDocumentProvider",
@@ -297,6 +297,29 @@ export async function run(): Promise<void> {
       ),
   );
   const editPartial = new vscode.WorkspaceEdit();
+  const fieldDefinitions = await eventually(
+    "implicit state field definition",
+    () =>
+      vscode.commands.executeCommand<(vscode.Location | vscode.LocationLink)[]>(
+        "vscode.executeDefinitionProvider",
+        uri,
+        find("text={name}").translate(0, 8),
+      ),
+    (result) =>
+      !!result?.some((item) => target(item).toString() === uri.toString()),
+  );
+  assert(
+    fieldDefinitions?.some((item) => {
+      const selection =
+        "targetUri" in item ? item.targetSelectionRange : item.range;
+      return (
+        target(item).toString() === uri.toString() &&
+        !!selection &&
+        doc.getText(selection) === "name"
+      );
+    }),
+    "generated state field navigation returns the authored typed declaration",
+  );
   const at = find("message.len()");
   editPartial.replace(
     uri,
@@ -381,6 +404,29 @@ export async function run(): Promise<void> {
     async () => vscode.languages.getDiagnostics(uri),
     (value) => !value.some((item) => item.code === "INRUX203"),
   );
+  const manual = original
+    .replace("<rust>", "<rust explicit>")
+    .replace(
+      "let name:String=String::new();",
+      "#[derive(Clone)] pub struct State { pub name: String }\npub fn setup() -> State { State { name: String::new() } }",
+    );
+  assert(
+    manual.includes("pub fn setup"),
+    "manual fixture replaces implicit initialization",
+  );
+  await snapshot(manual);
+  await eventually(
+    "explicit setup Rust definition",
+    () =>
+      vscode.commands.executeCommand<(vscode.Location | vscode.LocationLink)[]>(
+        "vscode.executeDefinitionProvider",
+        uri,
+        find('caption("Inrux")').translate(0, 2),
+      ),
+    (result) =>
+      !!result?.some((item) => target(item).toString() === uri.toString()),
+  );
+  await snapshot(original);
   console.log(
     "INRUX EXTENSION HOST PASSED: .iru recognition, component definition, full/idempotent formatting, tag tokens, Rust local/crate definitions, completion and hover.",
   );

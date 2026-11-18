@@ -2,20 +2,20 @@
     <Box class="stack">
         <DemoPanel title="Flex direction and retained input">
             <Row :style={Style::new().wrap(true)} gap={12.0}>
-                <Button :text={if state.column { "Use row direction" } else { "Use column direction" }} @click={toggle_direction} class="button" />
+                <Button :text={direction_label} @click={toggle_direction} class="button" />
                 <Text text="Edit the input, then change direction. Its value stays with the same control." class="muted" />
             </Row>
-            <Flex :direction={if state.column { FlexDirection::Column } else { FlexDirection::Row }} class="more-flex">
-                <Input key="layout-note" model:value={state.note} placeholder="This edit survives direction changes" width={Size::Px(300.0)} class="input" />
-                <Button :text={format!("Count: {}", state.count)} @click={increment} width={Size::Px(140.0)} class="button" />
+            <Flex :direction={direction} class="more-flex">
+                <Input key="layout-note" model:value={note} placeholder="This edit survives direction changes" width={Size::Px(300.0)} class="input" />
+                <Button :text={format!("Count: {}", count)} @click={increment} width={Size::Px(140.0)} class="button" />
             </Flex>
         </DemoPanel>
         <DemoPanel title="Grid columns and AspectRatio">
             <Row :style={Style::new().wrap(true)} gap={20.0}>
                 <Column width={Size::Px(260.0)} gap={10.0}>
                     <Text text="Equal-width columns, automatic rows" class="body" />
-                    <Button :text={if state.three_columns { "Use two columns" } else { "Use three columns" }} @click={toggle_columns} class="button" />
-                    <Grid :columns={if state.three_columns { 3 } else { 2 }} class="uniform-grid">
+                    <Button :text={columns_label} @click={toggle_columns} class="button" />
+                    <Grid :columns={columns} class="uniform-grid">
                         <Text text="Alpha" class="grid-cell" />
                         <Text text="Beta" class="grid-cell" />
                         <Text text="Gamma" class="grid-cell" />
@@ -26,10 +26,10 @@
                 </Column>
                 <Column width={Size::Px(300.0)} gap={10.0}>
                     <Text text="Preferred width / height" class="body" />
-                    <Button :text={if state.square { "Use landscape ratio" } else { "Use square ratio" }} @click={toggle_ratio} class="button" />
-                    <AspectRatio :ratio={if state.square { 1.0 } else { 16.0 / 9.0 }} class="ratio-example">
+                    <Button :text={ratio_label} @click={toggle_ratio} class="button" />
+                    <AspectRatio :ratio={ratio} class="ratio-example">
                         <Center height={Size::Fill}>
-                            <Text :text={if state.square { "1 : 1" } else { "16 : 9" }} />
+                            <Text :text={preview_label} />
                         </Center>
                     </AspectRatio>
                 </Column>
@@ -38,24 +38,64 @@
     </Box>
 </view>
 <rust>
-use inrux::prelude::*;
 use crate::components::demo_panel as DemoPanel;
-use crate::features::layout_more::{toggle_direction, toggle_columns, toggle_ratio, increment};
+use crate::features::layout_more::{increment, toggle_columns, toggle_direction, toggle_ratio};
+use inrux::prelude::*;
 #[derive(Clone)]
 pub struct Props {}
-#[derive(Clone)]
-pub struct State {
-    pub props: Props,
-    pub column: bool,
-    pub three_columns: bool,
-    pub square: bool,
-    pub note: String,
-    pub count: u32,
-}
-/// Each view owns its interactive sizing choices and controlled input.
-pub fn setup(props: Props) -> State {
-    State { props, column: false, three_columns: false, square: true, note: String::new(), count: 0 }
-}
+
+let column: Signal<bool> = Signal::new(false);
+let square: Signal<bool> = Signal::new(true);
+let three_columns: Signal<bool> = Signal::new(false);
+let direction_label_column = column.clone();
+let direction_label: Computed<&'static str> = Computed::new(move || {
+    if direction_label_column.get() {
+        "Use row direction"
+    } else {
+        "Use column direction"
+    }
+});
+let direction_column = column.clone();
+let direction: Computed<FlexDirection> = Computed::new(move || {
+    if direction_column.get() {
+        FlexDirection::Column
+    } else {
+        FlexDirection::Row
+    }
+});
+let columns_label_three_columns = three_columns.clone();
+let columns_label: Computed<&'static str> = Computed::new(move || {
+    if columns_label_three_columns.get() {
+        "Use two columns"
+    } else {
+        "Use three columns"
+    }
+});
+let columns_three_columns = three_columns.clone();
+let columns: Computed<u16> =
+    Computed::new(move || if columns_three_columns.get() { 3 } else { 2 });
+let ratio_label_square = square.clone();
+let ratio_label: Computed<&'static str> = Computed::new(move || {
+    if ratio_label_square.get() {
+        "Use landscape ratio"
+    } else {
+        "Use square ratio"
+    }
+});
+let ratio_square = square.clone();
+let ratio: Computed<f32> =
+    Computed::new(move || if ratio_square.get() { 1.0 } else { 16.0 / 9.0 });
+let preview_label_square = square.clone();
+let preview_label: Computed<&'static str> = Computed::new(move || {
+    if preview_label_square.get() {
+        "1 : 1"
+    } else {
+        "16 : 9"
+    }
+});
+
+let note: String = String::new();
+let count: u32 = 0;
 </rust>
 <style scoped>
 .more-flex { gap: 12px; padding: 8px; background: #ffffff; border-radius: 6px; }

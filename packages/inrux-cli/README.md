@@ -36,7 +36,7 @@ The starter contains main.rs, App.iru using `<view>`, an imported Counter compon
 
 The watcher observes local Cargo package sources, existing assets directories and Cargo configuration. Edits are coalesced, then Cargo rebuilds the application. A failed build preserves the last successful preview process. A successful build copies the executable, stops/reaps the old preview and launches the replacement. Copying allows the original Cargo artifact to be rebuilt on platforms that lock running executables. Ctrl-C cleans up the active preview.
 
-Restarting loses application state. State-preserving reload and broader asset/publication checks remain [roadmap work](../../docs/STATUS.md). Keep custom assets under watched source/assets paths; this is not a general asset bundler.
+Restarting loses application state. State-preserving reload and broader asset/publication checks remain [roadmap work](../../docs/content/1.getting-started/07.status.md). Keep custom assets under watched source/assets paths; this is not a general asset bundler.
 
 ## Organization and checks
 
@@ -47,6 +47,10 @@ cargo test -p inrux-cli --locked
 cargo run -p inrux-cli -- validate playground/egui/src/App.iru
 ```
 
-Refs and richer content syntax will be added to templates only when their public compiler/runtime support exists; see [alpha status](../../docs/STATUS.md).
+Refs and richer content syntax will be added to templates only when their public compiler/runtime support exists; see [alpha status](../../docs/content/1.getting-started/07.status.md).
 
 Engine selection is required while comparative validation is incomplete. `egui` provides the full current prototype surface; `masonry` and `gpui` are experimental and support the generated starter with fewer controls/styles. Unknown choices fail before the destination is created. Change the selected facade Cargo feature to switch a compatible starter; use `cargo update` if a lockfile conflicts with GPUI's exact dependency versions, then rebuild. See [GPUI native setup and shader options](../inrux-gpui/README.md). See [the adapter contract](../inrux-adapter/README.md).
+
+The generated App.iru declares typed state directly inside `<rust>`. Initialization runs once per component instance; the compiler generates State and setup internally.
+
+Use `<rust explicit>` when you want to author State and `pub fn setup` yourself. Plain `<rust>` uses automatic setup. Both forms initialize once per component mount.

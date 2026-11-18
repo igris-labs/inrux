@@ -3,11 +3,11 @@ use crate::views::layout::State;
 use inrux::{Color, Context, Size, Style};
 /// Toggle narrow/wide parent geometry without remounting the specimen.
 pub fn toggle_width(state: &mut State, _: &Context<State>) {
-    state.narrow = !state.narrow;
+    state.narrow.set(!state.narrow.get());
 }
 /// Demonstrate weighted sharing between two sibling Spacers.
 pub fn toggle_weight(state: &mut State, _: &Context<State>) {
-    state.weighted = !state.weighted;
+    state.weighted.set(!state.weighted.get());
 }
 /// Keep both examples inside the minimum supported application width.
 pub fn specimen_style(narrow: bool) -> Style {

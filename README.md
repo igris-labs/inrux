@@ -7,13 +7,15 @@
 
 An experimental native GUI framework for Rust, with `.iru` single-file components, reactive state, reusable components and compiled CSS-like styling.
 
-**Early alpha.** APIs and file syntax can change. This is a working prototype for community feedback, not a production-ready framework. [Current support and limitations](docs/STATUS.md) describe what works today.
+[Documentation](https://inrux.igrislabs.com) · [Installation](https://inrux.igrislabs.com/getting-started/installation)
+
+**Early alpha.** APIs and file syntax can change. This is a working prototype for community feedback, not a production-ready framework. [Current support and limitations](docs/content/1.getting-started/07.status.md) describe what works today.
 
 Inrux stands for **Igris Native Rust UI eXperience**. Application logic is Rust; `main.rs` mounts `App.iru`. Ordinary Rust modules and Cargo libraries work inside component logic. No browser or webview is required by the three current backends.
 
 ## Try the playgrounds
 
-Install a current stable Rust toolchain and your platform's [native build prerequisites](docs/GETTING-STARTED.md#requirements), then:
+Install a current stable Rust toolchain and your platform's [native build prerequisites](docs/content/1.getting-started/02.installation.md#requirements), then:
 
 ```sh
 git clone https://github.com/igris-labs/inrux.git
@@ -25,25 +27,21 @@ cargo run -p inrux-playground-gpui --locked
 
 Run one command at a time. On macOS without the Xcode Metal compiler, use `cargo run -p inrux-playground-gpui --features runtime-shaders --locked`. The fallback compiles shaders at runtime and can affect startup.
 
-All three applications contain the same portable component catalogue, light/dark themes, shared font assets and interactive examples. Select, Dialog and Heartbeat currently have working examples only in egui; the other applications show support notices. See [playground usage](docs/PLAYGROUNDS.md).
+All three applications contain the same portable component catalogue, light/dark themes, shared font assets and interactive examples. Select, Dialog and Heartbeat currently have working examples only in egui; the other applications show support notices. See [playground usage](docs/content/1.getting-started/05.playgrounds.md).
 
 ## Write a component
 
 ```xml
 <view>
     <Column gap={16.0}>
-        <Text text={format!("Count: {}", state.count)} />
+        <Text text={format!("Count: {}", count)} />
         <Button text="Increment" @click={increment} />
     </Column>
 </view>
 <rust>
 use inrux::prelude::*;
 
-#[derive(Clone)]
-pub struct State { count: u32 }
-
-/// Initialize this component once per mount.
-pub fn setup() -> State { State { count: 0 } }
+let count: u32 = 0;
 
 /// Apply the event on the application coordinator.
 fn increment(state: &mut State, _: &Context<State>) {
@@ -51,6 +49,8 @@ fn increment(state: &mut State, _: &Context<State>) {
 }
 </rust>
 ```
+
+The `<rust>` block is setup: typed top-level `let` declarations become retained `state` fields and initialize once per component instance. No setup function is required. Untyped locals are initialization helpers; imports and functions remain ordinary Rust items. The compiler generates the State type and the constructor used by `main.rs`.
 
 This is the body of `src/App.iru` in an Inrux application, not a standalone Rust program. The scaffold supplies Cargo dependencies, `build.rs` and `main.rs`:
 
@@ -60,7 +60,7 @@ cd ../hello-inrux
 cargo run
 ```
 
-Choose `egui`, `masonry` or `gpui` explicitly. The starter uses local path dependencies because the workspace is not published to crates.io. See [getting started](docs/GETTING-STARTED.md) and [component authoring](docs/AUTHORING.md).
+Choose `egui`, `masonry` or `gpui` explicitly. The starter uses local path dependencies because the workspace is not published to crates.io. See [getting started](docs/content/1.getting-started/02.installation.md) and [component authoring](docs/content/3.authoring/02.component-contract.md).
 
 ## What is here
 
@@ -71,7 +71,7 @@ Choose `egui`, `masonry` or `gpui` explicitly. The starter uses local path depen
 - Three optional native backends behind engine-neutral contracts, with shared Taffy layout and Parley/Swash text shaping and glyph rasterization.
 - A CLI, Rust language server and locally linked VS Code extension for `.iru` editing.
 
-CSS is a documented [subset](docs/CSS-ENGINE.md). Component/backend parity, accessibility, IME and platform conformance are still being developed. There are no verified claims of instant startup, zero overhead or superior memory usage.
+CSS is a documented [subset](docs/content/4.styling/02.css-reference.md). Component/backend parity, accessibility, IME and platform conformance are still being developed. There are no verified claims of instant startup, zero overhead or superior memory usage.
 
 ## Architecture
 
@@ -96,16 +96,24 @@ flowchart TB
 
 The application selects its backend at build/startup; a running window cannot switch engines. Enabling only one facade engine feature keeps the other GUI engines out of that application's dependency graph. Components and application state do not import engine widget types.
 
-Native input and painting stay on the UI thread. A coordinator processes application events and publishes component descriptions; expensive work belongs in a bounded task pool. Shared layout/text providers currently implement all three bindings. Delegating to alternative native services is an architectural extension, not an implemented optimization claim. Read the [architecture and ownership guide](docs/ARCHITECTURE.md).
+Native input and painting stay on the UI thread. A coordinator processes application events and publishes component descriptions; expensive work belongs in a bounded task pool. Shared layout/text providers currently implement all three bindings. Delegating to alternative native services is an architectural extension, not an implemented optimization claim. Read the [architecture and ownership guide](docs/content/2.internals/01.architecture.md).
 
 ## Documentation
 
-- [Getting started](docs/GETTING-STARTED.md)
-- [Repository structure](docs/REPOSITORY.md)
-- [Running and exploring the playgrounds](docs/PLAYGROUNDS.md)
-- [VS Code setup](docs/VSCODE.md)
-- [Component authoring](docs/AUTHORING.md) and [CSS support](docs/CSS-ENGINE.md)
-- [Support matrix and known limitations](docs/STATUS.md)
+The [documentation website](docs/README.md) uses Nuxt and Indocio. Run it from this checkout:
+
+```sh
+pnpm --dir docs install --frozen-lockfile
+pnpm --dir docs dev
+```
+
+
+- [Getting started](docs/content/1.getting-started/02.installation.md)
+- [Repository structure](docs/content/1.getting-started/04.project-structure.md)
+- [Running and exploring the playgrounds](docs/content/1.getting-started/05.playgrounds.md)
+- [VS Code setup](docs/content/1.getting-started/06.vscode.md)
+- [Component authoring](docs/content/3.authoring/02.component-contract.md) and [CSS support](docs/content/4.styling/02.css-reference.md)
+- [Support matrix and known limitations](docs/content/1.getting-started/07.status.md)
 - [Contributing and checks](CONTRIBUTING.md)
 - [Brand assets and usage](assets/brand/README.md)
 
@@ -118,3 +126,7 @@ Please [open an issue](https://github.com/igris-labs/inrux/issues) with your OS,
 ## License
 
 Original Inrux code is licensed under [MIT](LICENSE). Bundled/adapted third-party code and fonts retain their licenses and notices; see [third-party notices](THIRD_PARTY_NOTICES.md). In particular, the Masonry and GPUI adapter crates include Apache-2.0 adaptations. The project is not offered under a project-wide dual MIT/Apache license.
+
+Use `<rust explicit>` when you want to author State and `pub fn setup` yourself. Plain `<rust>` uses automatic setup. Both forms initialize once per component mount.
+
+View bindings can use retained names directly, including `counter.count` from a composable. This works in both `<rust>` and `<rust explicit>`. Complete direct bindings read Signal/Computed values automatically; Rust handlers still use explicit state parameters.

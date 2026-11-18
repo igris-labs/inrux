@@ -7,7 +7,8 @@ pub use inrux_adapter::{
 pub use inrux_components::{
     Component, ComponentHost, Events, Handler, InputEvent, ModelEdit, ModelValue, NoPayload, Node,
     NodeKind, RangeKind, RangeValue, ScrollMetrics, ScrollOffset, ScrollRequest, Stylesheet,
-    ToggleKind, WithPayload, component_depth, component_key, component_scope, render_child,
+    ToggleKind, ViewValue, WithPayload, component_depth, component_key, component_scope,
+    render_child,
 };
 pub use inrux_core::reactive::{Computed, ReactiveError, Signal};
 pub use inrux_core::tasks::{Cancellation, TaskError, TaskHandle, TaskQueueError};

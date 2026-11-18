@@ -1,0 +1,30 @@
+title: Build native Rust interfaces.
+description: Learn Inrux through .iru components, ordinary Rust logic and compiled CSS-like styling. Start with a working playground, then build your own app. Early alpha, with APIs and backend coverage still changing.
+links:
+  - label: Get started
+    to: /getting-started/installation
+  - label: Why .iru?
+    to: /authoring/iru-format
+featuresTitle: Find the part you need.
+features:
+  - title: Write a component you can follow.
+    description: Keep a component's layout, bindings and local handlers together. Import business logic from ordinary Rust modules.
+    code: |
+      <view>
+          <Button text="Save" @click={save} />
+      </view>
+      <rust>
+      use crate::services::workspace;
+      </rust>
+  - title: Choose your native backend.
+    description: Run the same portable catalogue with egui, Masonry or GPUI. Check the support matrix for controls that still differ.
+    code: |
+      cargo run -p inrux-playground-egui --locked
+      cargo run -p inrux-playground-masonry --locked
+      cargo run -p inrux-playground-gpui --locked
+  - title: Style supported parts and states.
+    description: Use a documented CSS subset or Rust styles. Components keep their behavior while your app supplies its appearance.
+    code: |
+      .save { padding: 12px; color: white; }
+      .save:hover { background: #b84200; }
+      Switch::part(thumb) { background: white; }

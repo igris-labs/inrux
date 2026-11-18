@@ -3,14 +3,14 @@
         <DemoPanel title="Box, Container, Row and Spacer">
             <Text text="Change the specimen width. The green container caps at 560px and centers inside it." class="muted" />
             <Row :style={Style::new().wrap(true)} gap={8.0}>
-                <Button :text={if state.narrow { "Use wide specimen" } else { "Use narrow specimen" }} @click={toggle_width} class="button" />
-                <Button :text={if state.weighted { "Use equal spacers" } else { "Double the first spacer" }} @click={toggle_weight} class="button" />
+                <Button :text={width_label} @click={toggle_width} class="button" />
+                <Button :text={weight_label} @click={toggle_weight} class="button" />
             </Row>
-            <Box :style={specimen_style(state.narrow)}>
+            <Box :style={specimen_style(narrow.get())}>
                 <Container class="layout-container">
                     <Row height={Size::Px(40.0)}>
                         <Text text="Start" class="body" />
-                        <Spacer :style={Style::new().flex_grow(if state.weighted { 2.0 } else { 1.0 })} />
+                        <Spacer :style={Style::new().flex_grow(spacer_weight.get().unwrap_or(1.0))} />
                         <Text text="Middle" class="body" />
                         <Spacer />
                         <Text text="End" class="body" />
@@ -39,15 +39,38 @@
     </Box>
 </view>
 <rust>
-use inrux::prelude::*;
 use crate::components::demo_panel as DemoPanel;
-use crate::features::layout::{toggle_width, toggle_weight, specimen_style};
+use crate::features::layout::{specimen_style, toggle_weight, toggle_width};
+use inrux::prelude::*;
 #[derive(Clone)]
 pub struct Props {}
-#[derive(Clone)]
-pub struct State { pub props: Props, pub narrow: bool, pub weighted: bool }
-/// Local controls affect only this view's live specimens.
-pub fn setup(props: Props) -> State { State { props, narrow: false, weighted: false } }
+
+let narrow: Signal<bool> = Signal::new(false);
+let weighted: Signal<bool> = Signal::new(false);
+let width_label_narrow = narrow.clone();
+let width_label: Computed<&'static str> = Computed::new(move || {
+    if width_label_narrow.get() {
+        "Use wide specimen"
+    } else {
+        "Use narrow specimen"
+    }
+});
+let weight_label_weighted = weighted.clone();
+let weight_label: Computed<&'static str> = Computed::new(move || {
+    if weight_label_weighted.get() {
+        "Use equal spacers"
+    } else {
+        "Double the first spacer"
+    }
+});
+let spacer_weight_weighted = weighted.clone();
+let spacer_weight: Computed<f32> = Computed::new(move || {
+    if spacer_weight_weighted.get() {
+        2.0
+    } else {
+        1.0
+    }
+});
 </rust>
 <style scoped>
 .layout-container { max-width: 560px; padding: 12px; background: #e4ebe7; border-radius: 6px; }

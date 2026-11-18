@@ -6,15 +6,15 @@
             <Button text="Scroll to end" @click={end} class="button" />
             <Button text="Resize viewport" @click={resize} class="button" />
             <Button text="Long text" @click={long_text} class="button" />
-            <Text :text={format!("Offset: {:.0} / {:.0}", state.metrics.offset.y, (state.metrics.content_height - state.metrics.height).max(0.0))} class="body" />
+            <Text :text={format!("Offset: {:.0} / {:.0}", metrics.offset.y, (metrics.content_height - metrics.height).max(0.0))} class="body" />
         </Row>
-        <ScrollArea key="outer-viewport" :height={Size::Px(if state.compact { 240.0 } else { 320.0 })} :scroll_to={state.request} @scroll={observe} class="scroll-outer">
-            <Input key="scroll-note" model:value={state.note} placeholder="This edit survives scrolling and resizing" class="input" />
+        <ScrollArea key="outer-viewport" :height={Size::Px(viewport_height.get().unwrap_or(320.0))} :scroll_to={request} @scroll={observe} class="scroll-outer">
+            <Input key="scroll-note" model:value={note} placeholder="This edit survives scrolling and resizing" class="input" />
             <Row :style={Style::new().wrap(true)} gap={16.0}>
                 <Column width={Size::Px(240.0)} gap={8.0}>
                     <Text text="Nested vertical viewport" class="section-title" />
                     <ScrollArea key="inner-viewport" height={Size::Px(160.0)} class="scroll-inner">
-                        <For each={state.rows.iter()} item="row" key={row}>
+                        <For each={rows.iter()} item="row" key={row}>
                             <Button :text={format!("Nested row {}", row)} @click={increment} class="button" />
                         </For>
                     </ScrollArea>
@@ -30,44 +30,48 @@
                     </ScrollArea>
                 </Column>
             </Row>
-            <Text :text={format!("Actions: {}", state.count)} class="body" />
-            <For each={state.rows.iter()} item="row" key={row}>
+            <Text :text={format!("Actions: {}", count)} class="body" />
+            <For each={rows.iter()} item="row" key={row}>
                 <Button :text={format!("Outer row {}", row)} @click={increment} class="button" />
             </For>
             <Text text="TextArea: Enter adds a line; long paragraphs wrap. Wheel inside the field to scroll its text." class="body" />
-            <Checkbox model:checked={state.notes_disabled} label="Disable multiline editor" />
-            <TextArea key="multiline-note" model:value={state.notes} disabled={state.notes_disabled} placeholder="Write multiple lines…" class="textarea" />
-            <Text :text={format!("{} lines · {} characters", state.notes.lines().count(), state.notes.chars().count())} class="muted" />
-            <Input key="end-note" model:value={state.end_note} placeholder="Tab can reveal this last input" class="input" />
+            <Checkbox model:checked={notes_disabled} label="Disable multiline editor" />
+            <TextArea key="multiline-note" model:value={notes} disabled={notes_disabled} placeholder="Write multiple lines…" class="textarea" />
+            <Text :text={format!("{} lines · {} characters", notes.lines().count(), notes.chars().count())} class="muted" />
+            <Input key="end-note" model:value={end_note} placeholder="Tab can reveal this last input" class="input" />
         </ScrollArea>
         <Text text="Focus a pane for arrows, Page Up/Down, Home/End. Drag a scrollbar to move directly." class="muted" />
     </DemoPanel>
 </view>
 <rust>
-use inrux::prelude::*;
 use crate::components::demo_panel as DemoPanel;
-use crate::features::scrolling::{top, end, resize, observe, increment, long_text};
+use crate::features::scrolling::{end, increment, long_text, observe, resize, top};
+use inrux::prelude::*;
 #[derive(Clone)]
 pub struct Props {}
-#[derive(Clone)]
-pub struct State {
-    pub props: Props,
-    pub note: String,
-    pub notes: String,
-    pub notes_disabled: bool,
-    pub end_note: String,
-    pub compact: bool,
-    pub count: u32,
-    pub rows: Vec<u32>,
-    pub metrics: ScrollMetrics,
-    pub request: ScrollRequest,
-}
-/// Each mount owns its commands and models; the adapter owns wheel-driven offsets.
-pub fn setup(props: Props) -> State {
-    State { props, note: String::new(), notes: "First line\nSecond line: write a longer paragraph here to see wrapping.\n".repeat(5), notes_disabled: false, end_note: String::new(), compact: false, count: 0,
-        rows: (1..=12).collect(), metrics: ScrollMetrics::default(),
-        request: ScrollRequest { revision: 0, offset: ScrollOffset::default() } }
-}
+
+let compact: Signal<bool> = Signal::new(false);
+let viewport_height_compact = compact.clone();
+let viewport_height: Computed<f32> = Computed::new(move || {
+    if viewport_height_compact.get() {
+        240.0
+    } else {
+        320.0
+    }
+});
+
+let note: String = String::new();
+let notes: String =
+    "First line\nSecond line: write a longer paragraph here to see wrapping.\n".repeat(5);
+let notes_disabled: bool = false;
+let end_note: String = String::new();
+let count: u32 = 0;
+let rows: Vec<u32> = (1..=12).collect();
+let metrics: ScrollMetrics = ScrollMetrics::default();
+let request: ScrollRequest = ScrollRequest {
+    revision: 0,
+    offset: ScrollOffset::default(),
+};
 </rust>
 <style scoped>
 .textarea { width: 100%; height: 140px; background: #ffffff; border-color: #8e9a95; border-width: 1px; border-radius: 6px; }

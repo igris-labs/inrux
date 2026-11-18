@@ -3,21 +3,21 @@ use crate::views::controls::State;
 use inrux::{Color, Context, Style};
 /// A model update marks the same committed frame dirty.
 pub fn mark_dirty(state: &mut State, _: &Context<State>) {
-    state.saved = false;
+    state.saved.set(false);
 }
 /// Save only in memory, never to user files.
 pub fn save(state: &mut State, _: &Context<State>) {
-    state.saved = true;
+    state.saved.set(true);
 }
 /// Programmatic replacement also updates a focused or disabled native editor.
 pub fn reset(state: &mut State, _: &Context<State>) {
     state.name = "Inrux Workspace".into();
-    state.saved = true;
+    state.saved.set(true);
 }
 /// Empty input reveals the native placeholder.
 pub fn clear(state: &mut State, _: &Context<State>) {
     state.name.clear();
-    state.saved = false;
+    state.saved.set(false);
 }
 /// This deliberately wired handler makes disabled admission observable.
 pub fn forbidden(state: &mut State, _: &Context<State>) {

@@ -12,3 +12,7 @@ This unpublished starter depends on your local Inrux checkout. Its Cargo.toml se
 GPUI on macOS normally requires Xcode's Metal compiler component. If that component is missing, `cargo run --features inrux/gpui-runtime-shaders` is the explicit development fallback; shader compilation then happens during startup.
 
 `src/components/Counter.iru` demonstrates typed reusable props/events and scoped CSS. Two independently initialized counters share an ordinary Rust composable. Global CSS loads explicitly in main.rs. Blocking work should use Context::spawn_task; state updates and views run on the coordinator while native UI work stays on the main thread.
+
+The `<rust>` block in App.iru is implicit setup. Typed top-level let declarations become retained state; untyped locals are initialization helpers. The compiler generates State and setup internally.
+For manual initialization, use <rust explicit> and declare State plus pub fn setup yourself; close the block with </rust>.
+View bindings can use first and second directly; Signal/Computed values are read automatically in complete direct bindings. Rust handlers continue to use state.first and state.second.

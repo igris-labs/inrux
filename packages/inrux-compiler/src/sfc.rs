@@ -8,6 +8,7 @@ use std::{ops::Range, sync::Arc};
 pub(crate) struct Block {
     pub(crate) body: Range<usize>,
     pub(crate) opening: Range<usize>,
+    pub(crate) explicit: bool,
 }
 /// Required view/Rust blocks and optional global/scoped stylesheets.
 pub(crate) struct Blocks {
@@ -33,6 +34,8 @@ pub(crate) fn parse(source: &Arc<SourceFile>) -> Result<Blocks, CompileError> {
             ("<view>", "</view>", &mut view)
         } else if text[offset..].starts_with("<template>") {
             ("<template>", "</template>", &mut view)
+        } else if text[offset..].starts_with("<rust explicit>") {
+            ("<rust explicit>", "</rust>", &mut rust)
         } else if text[offset..].starts_with("<rust>") {
             ("<rust>", "</rust>", &mut rust)
         } else if text[offset..].starts_with("<style scoped>") {
@@ -45,7 +48,7 @@ pub(crate) fn parse(source: &Arc<SourceFile>) -> Result<Blocks, CompileError> {
                 "INRUX001",
                 Phase::Blocks,
                 offset..offset + text[offset..].chars().next().map_or(0, char::len_utf8),
-                "Expected <view>, <rust>, <style>, or <style scoped>; <template> is a legacy alias",
+                "Expected <view>, <rust>, <rust explicit>, <style>, or <style scoped>; <template> is a legacy alias",
             )
             .with_help("Place component content inside a supported block."));
         };
@@ -69,6 +72,7 @@ pub(crate) fn parse(source: &Arc<SourceFile>) -> Result<Blocks, CompileError> {
         *slot = Some(Block {
             body: body_start..end,
             opening: opening_range,
+            explicit: opening == "<rust explicit>",
         });
         offset = end + closing.len();
     }
