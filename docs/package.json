@@ -20,6 +20,7 @@
     "@igrislabs/indocio": "0.0.1",
     "@nuxt/content": "3.16.2",
     "nuxt": "4.6.4",
+    "nuxt-gtag": "^5.1.0",
     "vue": "3.5.45",
     "vue-router": "5.4.0"
   },

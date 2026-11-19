@@ -4,6 +4,7 @@ const siteUrl = env.NUXT_SITE_URL || "https://inrux.igrislabs.com";
 
 export default defineNuxtConfig({
   extends: ["@igrislabs/indocio"],
+  modules: ["nuxt-gtag"],
   css: ["~/assets/main.css"],
 
   devtools: { enabled: true },
