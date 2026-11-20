@@ -2,6 +2,7 @@
 name = "inrux-gpui"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license = "MIT AND Apache-2.0"
 publish.workspace = true
 

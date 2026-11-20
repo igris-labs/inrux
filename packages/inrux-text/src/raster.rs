@@ -192,8 +192,8 @@ fn draw<B: Brush>(
     let mut rgba = vec![0u8; width as usize * height as usize * 4];
     let mut bounds = [width, height, 0, 0];
     for line in layout.lines() {
-        if line.metrics().max_coord * scale + 128.0 < top as f32
-            || line.metrics().min_coord * scale - 128.0 > (top + height) as f32
+        if line.metrics().block_max_coord * scale + 128.0 < top as f32
+            || line.metrics().block_min_coord * scale - 128.0 > (top + height) as f32
         {
             continue;
         }
@@ -214,7 +214,7 @@ fn draw<B: Brush>(
                 .builder(face)
                 .size(run.font_size() * scale)
                 .hint(false)
-                .normalized_coords(run.normalized_coords())
+                .normalized_coords(run.normalized_coords().iter().map(|coord| coord.to_bits()))
                 .build();
             let mut x = glyphs.offset();
             for glyph in glyphs.glyphs() {

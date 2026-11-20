@@ -1,5 +1,6 @@
 //! Native text editing uses the shared versioned model protocol.
 use crate::widgets::text;
+use crate::widgets::text_styles::StyleProperty;
 mod area;
 mod field;
 pub(crate) use area::TextArea;
@@ -7,7 +8,6 @@ pub(crate) use field::TextInput;
 use inrux_style::Style;
 use masonry::{
     core::{NewWidget, WidgetMut},
-    parley::StyleProperty,
     properties::ContentColor,
 };
 /// Build a native editor with a known action-producing text-area identity.
@@ -20,11 +20,11 @@ pub(crate) fn build(
     let area = TextArea::new_editable(value)
         .with_word_wrap(multiline)
         .with_style(StyleProperty::LineHeight(
-            masonry::parley::LineHeight::FontSizeRelative(inrux_adapter::controls::LINE_HEIGHT),
+            parley::LineHeight::FontSizeRelative(inrux_adapter::controls::LINE_HEIGHT),
         ))
         .with_style(StyleProperty::FontSize(style.font_size.unwrap_or(15.0)));
     let area = if let Some(family) = &style.font_family {
-        area.with_style(StyleProperty::FontStack(crate::widgets::text::family(
+        area.with_style(StyleProperty::FontFamily(crate::widgets::text::family(
             family,
         )))
     } else {
@@ -76,7 +76,7 @@ pub(crate) fn update(
     if previous.is_none_or(|old| old.font_family != style.font_family) {
         TextArea::insert_style(
             &mut area,
-            StyleProperty::FontStack(text::resolved_family(style)),
+            StyleProperty::FontFamily(text::resolved_family(style)),
         );
     }
     if area.widget.text() != value {

@@ -36,7 +36,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
             // editor will need to change eventually anyway...
             let _ = self.editor.edit_styles();
         }
-        let (_, lctx) = ctx.text_contexts();
+        let lctx = &mut self.layouts;
         let layout = self.editor.layout(&mut self.fonts, lctx);
         let extent = layout.full_width();
         let text_height = layout.height();
@@ -81,7 +81,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
     ) {
         if self.editor.try_layout().is_none() {
             // Rebuild an invalidated native shaping cache before using its glyph geometry.
-            let (_, lctx) = ctx.text_contexts();
+            let lctx = &mut self.layouts;
             self.editor.refresh_layout(&mut self.fonts, lctx);
         }
         let Some(layout) = self.editor.try_layout() else {
@@ -194,18 +194,30 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
         if !EDITABLE {
             node.set_read_only();
         }
-        let updated = self.editor.try_accessibility(
+        let Some(layout) = self.editor.try_layout() else {
+            debug_panic!("Could not generate accessibility nodes for text area");
+            return;
+        };
+        self.accessibility.build_nodes(
+            self.editor.raw_text(),
+            layout,
             ctx.tree_update(),
             node,
             || NodeId::from(WidgetId::next()),
             -f64::from(self.viewport.offset()),
             -f64::from(self.vertical.offset()),
         );
-
-        let Some(()) = updated else {
-            // We always perform layout before accessibility, so this panic should be unreachable.
-            debug_panic!("Could not generate accessibility nodes for text area");
-            return;
-        };
+        if ctx.is_focus_target() {
+            let selection = self.editor.raw_selection();
+            if let Some(selection) = self
+                .accessibility
+                .selection(selection.anchor().index(), selection.focus().index())
+            {
+                node.set_text_selection(selection);
+            }
+        } else {
+            node.clear_text_selection();
+        }
+        node.add_action(accesskit::Action::SetTextSelection);
     }
 }

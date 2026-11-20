@@ -15,7 +15,7 @@ Inrux stands for **Igris Native Rust UI eXperience**. Application logic is Rust;
 
 ## Try the playgrounds
 
-Install a current stable Rust toolchain and your platform's [native build prerequisites](docs/content/1.getting-started/02.installation.md#requirements), then:
+Install Rust 1.98 or newer (current stable recommended) and your platform's [native build prerequisites](docs/content/1.getting-started/02.installation.md#requirements), then:
 
 ```sh
 git clone https://github.com/igris-labs/inrux.git
@@ -97,6 +97,8 @@ flowchart TB
 The application selects its backend at build/startup; a running window cannot switch engines. Enabling only one facade engine feature keeps the other GUI engines out of that application's dependency graph. Components and application state do not import engine widget types.
 
 Native input and painting stay on the UI thread. A coordinator processes application events and publishes component descriptions; expensive work belongs in a bounded task pool. Shared layout/text providers currently implement all three bindings. Delegating to alternative native services is an architectural extension, not an implemented optimization claim. Read the [architecture and ownership guide](docs/content/2.internals/01.architecture.md).
+
+Inrux owns the intended interaction and accessibility contract when engines disagree. Adapters must follow it through conformant native behavior or shared policy. The common form/modal conformance suite is planned; current playgrounds do not establish full behavioral parity. See [behavior ownership and validation](docs/content/2.internals/05.behavior-contract.md).
 
 ## Documentation
 

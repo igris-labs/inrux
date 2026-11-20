@@ -49,7 +49,9 @@ pub fn render_ref(node: &Node, ui: &mut egui::Ui) -> Result<Option<String>, Adap
     );
     let mut error = None;
     let mut viewports = Vec::new();
-    let root_id = ui.id().with(("inrux-root", &node.key, &node.generation));
+    let root_id = ui
+        .scope_id()
+        .with(("inrux-root", &node.key, &node.generation));
     paint(
         node,
         &computed,
@@ -59,6 +61,6 @@ pub fn render_ref(node: &Node, ui: &mut egui::Ui) -> Result<Option<String>, Adap
         &mut error,
         &mut viewports,
     )?;
-    crate::viewport::sweep(ui, ui.id(), viewports);
+    crate::viewport::sweep(ui, ui.scope_id(), viewports);
     Ok(error)
 }

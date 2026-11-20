@@ -14,7 +14,7 @@ export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
   if (!vscode.workspace.isTrusted) return;
-  const output = vscode.window.createOutputChannel("Inrux");
+  const output = vscode.window.createOutputChannel("Inrux", { log: true });
   context.subscriptions.push(output);
   const configured = vscode.workspace
     .getConfiguration("inrux")

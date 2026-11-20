@@ -6,3 +6,7 @@ Inrux changes add single-line horizontal viewport state, caret reveal, translate
 pointer/IME/accessibility geometry, and focused module boundaries. Native Parley
 editing, selection, clipboard and IME behavior is retained. The Apache-2.0 license
 is included at ../../licenses/Apache-2.0.txt.
+
+text_accessibility.rs adapts Parley 0.6.0 AccessKit integration for the Parley
+0.13 layout API. Copyright 2021 the Parley Authors. Original source is
+Apache-2.0 OR MIT; the original SPDX header remains in the adaptation.

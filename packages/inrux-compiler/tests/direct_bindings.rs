@@ -41,3 +41,16 @@ fn block_imports_keep_their_rust_scope() {
     .unwrap();
     assert!(!generated.contains("state.name"));
 }
+
+#[test]
+fn match_guards_bind_local_patterns_and_resolve_component_values() {
+    let generated = compile(&source(
+        r#"<Text text={match value { count if count > limit => format!("{}", count), _ => String::new() }} />"#,
+        "let value: u32 = 4; let count: u32 = 99; let limit: u32 = 2;",
+    )).unwrap();
+    let compact = generated.split_whitespace().collect::<String>();
+    assert!(compact.contains("matchstate.value"));
+    assert!(compact.contains("ifcount>state.limit"));
+    assert!(!compact.contains("state.count"));
+    syn::parse_file(&generated).unwrap();
+}

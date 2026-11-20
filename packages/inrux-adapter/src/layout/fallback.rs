@@ -22,68 +22,75 @@ pub fn compute(
             width: tf::AvailableSpace::Definite(width),
             height: height.map_or(tf::AvailableSpace::MaxContent, tf::AvailableSpace::Definite),
         },
-        |known, available, _, context, _| {
-            let Some(context) = context else {
-                return tf::Size::ZERO;
-            };
-            let max_width = known.width.unwrap_or(match available.width {
-                // Intrinsic probes may subtract padding from zero available space.
-                // Text providers receive an empty content box, never a negative width.
-                tf::AvailableSpace::Definite(width) => {
-                    if width < 0.0 {
-                        0.0
-                    } else {
-                        width
-                    }
-                }
-                tf::AvailableSpace::MinContent => 1.0,
-                tf::AvailableSpace::MaxContent => f32::INFINITY,
-            });
-            if failure.is_some() {
-                return tf::Size::ZERO;
-            }
-            let request = TextMeasure {
-                text: &context.text,
-                font_size: context.font_size,
-                font_family: context.font_family.as_deref(),
-                max_width: if context.control || context.preformatted {
-                    f32::INFINITY
-                } else {
-                    max_width
-                },
-            };
-            let result = crate::services::text::validate_request(&request)
-                .and_then(|()| measure.measure(request))
-                .and_then(|size| {
-                    crate::services::text::validate_size(size, "taffy text measurer")?;
-                    Ok(size)
-                });
-            let crate::services::text::TextSize { width, height } = match result {
-                Ok(size) => size,
-                Err(error) => {
-                    failure = Some(error);
-                    return tf::Size::ZERO;
-                }
-            };
-            tf::Size {
-                width: if context.preformatted {
-                    width.ceil()
-                } else {
-                    known.width.unwrap_or(if context.input {
-                        220.0
-                    } else {
-                        // Native layout may quantize bounds; round natural size up so a final word fits.
-                        (width
-                            + if context.control {
-                                context.control_extra
-                            } else {
+        |inputs, _, context, style| {
+            taffy::compute_leaf_layout(
+                inputs,
+                style,
+                |_, _| 0.0,
+                |known, available| {
+                    let Some(context) = context else {
+                        return tf::Size::ZERO;
+                    };
+                    let max_width = known.width.unwrap_or(match available.width {
+                        // Intrinsic probes may subtract padding from zero available space.
+                        // Text providers receive an empty content box, never a negative width.
+                        tf::AvailableSpace::Definite(width) => {
+                            if width < 0.0 {
                                 0.0
+                            } else {
+                                width
+                            }
+                        }
+                        tf::AvailableSpace::MinContent => 1.0,
+                        tf::AvailableSpace::MaxContent => f32::INFINITY,
+                    });
+                    if failure.is_some() {
+                        return tf::Size::ZERO;
+                    }
+                    let request = TextMeasure {
+                        text: &context.text,
+                        font_size: context.font_size,
+                        font_family: context.font_family.as_deref(),
+                        max_width: if context.control || context.preformatted {
+                            f32::INFINITY
+                        } else {
+                            max_width
+                        },
+                    };
+                    let result = crate::services::text::validate_request(&request)
+                        .and_then(|()| measure.measure(request))
+                        .and_then(|size| {
+                            crate::services::text::validate_size(size, "taffy text measurer")?;
+                            Ok(size)
+                        });
+                    let crate::services::text::TextSize { width, height } = match result {
+                        Ok(size) => size,
+                        Err(error) => {
+                            failure = Some(error);
+                            return tf::Size::ZERO;
+                        }
+                    };
+                    tf::Size {
+                        width: if context.preformatted {
+                            width.ceil()
+                        } else {
+                            known.width.unwrap_or(if context.input {
+                                220.0
+                            } else {
+                                // Native layout may quantize bounds; round natural size up so a final word fits.
+                                (width
+                                    + if context.control {
+                                        context.control_extra
+                                    } else {
+                                        0.0
+                                    })
+                                .ceil()
                             })
-                        .ceil()
-                    })
+                        },
+                        height: known.height.unwrap_or(height.ceil()),
+                    }
                 },
-                height: known.height.unwrap_or(height.ceil()),
-            }
+            )
         },
     )
     .map_err(layout_error)?;
@@ -96,8 +103,8 @@ pub fn compute(
 fn geometry(node: &LayoutNode, tree: &tf::TaffyTree<Measure>) -> Result<LayoutBox, AdapterError> {
     let layout = tree.layout(node.id).map_err(layout_error)?;
     Ok(LayoutBox {
-        content_width: layout.content_size.width,
-        content_height: layout.content_size.height,
+        content_width: layout.scrollable_overflow_rect.right,
+        content_height: layout.scrollable_overflow_rect.bottom,
         x: layout.location.x,
         y: layout.location.y,
         width: layout.size.width,

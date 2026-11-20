@@ -18,14 +18,14 @@
   },
   "dependencies": {
     "@igrislabs/indocio": "0.0.1",
-    "@nuxt/content": "3.16.2",
+    "@nuxt/content": "3.17.0",
     "nuxt": "4.6.4",
     "nuxt-gtag": "^5.1.0",
-    "vue": "3.5.45",
-    "vue-router": "5.4.0"
+    "vue": "3.5.46",
+    "vue-router": "5.5.1"
   },
   "devDependencies": {
-    "@types/node": "24",
+    "@types/node": "^26.6.6",
     "typescript": "6.0.3",
     "vue-tsc": "3.3.14"
   },
@@ -35,6 +35,9 @@
       "@parcel/watcher",
       "esbuild",
       "sharp"
-    ]
+    ],
+    "overrides": {
+      "@nuxt/content": "3.17.0"
+    }
   }
 }

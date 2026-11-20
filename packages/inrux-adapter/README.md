@@ -71,3 +71,7 @@ Switch, determinate Progress and bounded Meter share portable descriptors and wo
 ## Headless style foundation
 
 [Public parts and owner-state styles](../../docs/content/4.styling/03.parts-and-states.md) now provide overrideable boolean metrics/paint, labels, range fills and editor placeholder ink across all three engines. CSS and Rust share the same resolver and physical margin cascade. [Literal color values](../../docs/content/4.styling/04.colors.md) include alpha/OKLCH through the pinned color parser, with native alpha preserved. The guide records the unpublished Color tuple-pattern migration and remaining CSS/part limits. Application recipes remain in playground styles.
+
+## Behavior authority
+
+Inrux owns the interaction and accessibility contract. Adapters must suppress conflicting native defaults and select shared behavior when required; each input action has one owner. Native event delivery, IME candidate integration and platform accessibility bridges stay below this boundary. Current shared text and scroll providers remain in use. The common form/modal driver suite and full platform parity are planned, not delivered. See [the ownership and conformance plan](../../docs/content/2.internals/05.behavior-contract.md).

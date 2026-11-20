@@ -9,8 +9,7 @@ pub(crate) fn paint(node: &Node, ui: &mut egui::Ui, visual: &Visual<'_>) {
     };
     let response = ui.interact(visual.rect, visual.path, egui::Sense::hover());
     response.widget_info(|| {
-        let mut info =
-            egui::WidgetInfo::labeled(egui::WidgetType::ProgressIndicator, true, &range.label);
+        let mut info = egui::WidgetInfo::labeled(egui::Role::ProgressIndicator, true, &range.label);
         info.value = Some(range.value);
         info
     });

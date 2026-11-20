@@ -58,3 +58,7 @@ cargo doc -p inrux-core --no-deps
 Tests cover ordering, saturation, cancellation, panic behavior, retained state, subscriptions and computed dependencies. Snapshot clones containing Signals/Instances share those handles; native rendering instead consumes owned Node descriptions.
 
 Render refs will reuse generational identity and cancellation while keeping native widget access on the UI thread. They are [not implemented yet](../../docs/content/1.getting-started/07.status.md); they are distinct from a Rust borrow or InstanceHandle.
+
+## Interaction authority
+
+Core owns the intended component behavior and canonical accessibility contract when engines disagree. Shared policies and native adapters implement that authority with one owner per input action; native objects do not move into Core. The complete form/modal contract and conformance suite remain planned. See [behavior ownership and validation](../../docs/content/2.internals/05.behavior-contract.md).

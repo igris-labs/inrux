@@ -27,13 +27,13 @@
     "test:unit": "npm run compile && node --test tests/*.test.cjs"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^11.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/vscode": "^1.100.0",
+    "@types/node": "^26.6.6",
+    "@types/vscode": "^1.146.0",
     "@vscode/test-electron": "^3.1.0",
-    "typescript": "^5.8.0",
+    "typescript": "^7.0.2",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },

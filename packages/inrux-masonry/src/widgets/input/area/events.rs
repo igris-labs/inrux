@@ -113,7 +113,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
                         self.viewport.offset().into(),
                         self.vertical.offset().into(),
                     );
-                let (_, lctx) = ctx.text_contexts();
+                let lctx = &mut self.layouts;
                 let fctx = &mut self.fonts;
                 let mut drv = self.editor.driver(fctx, lctx);
                 match state.count {
@@ -145,7 +145,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
                         self.viewport.offset().into(),
                         self.vertical.offset().into(),
                     );
-                let (_, lctx) = ctx.text_contexts();
+                let lctx = &mut self.layouts;
                 let fctx = &mut self.fonts;
                 self.editor
                     .driver(fctx, lctx)
@@ -203,7 +203,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
                         key_event.modifiers.ctrl()
                     },
                 );
-                let (_, lctx) = ctx.text_contexts();
+                let lctx = &mut self.layouts;
                 let fctx = &mut self.fonts;
                 // Whether the text was changed.
                 let mut edited = false;
@@ -357,7 +357,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
                             InsertNewline::Never => false,
                         };
                         if insert_newline {
-                            let (_, lctx) = ctx.text_contexts();
+                            let lctx = &mut self.layouts;
                             let fctx = &mut self.fonts;
                             self.editor
                                 .driver(fctx, lctx)
@@ -409,7 +409,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
             }
 
             TextEvent::Ime(e) => {
-                let (_, lctx) = ctx.text_contexts();
+                let lctx = &mut self.layouts;
                 let fctx = &mut self.fonts;
 
                 // Whether the returned text has changed.
@@ -465,7 +465,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
 
             TextEvent::ClipboardPaste(text) => {
                 if EDITABLE {
-                    let (_, lctx) = ctx.text_contexts();
+                    let lctx = &mut self.layouts;
                     let fctx = &mut self.fonts;
                     self.editor.driver(fctx, lctx).insert_or_replace_selection(
                         &inrux_components::normalize_text(text, self.word_wrap),
@@ -497,11 +497,16 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
             }
 
             if let Some(accesskit::ActionData::SetTextSelection(selection)) = &event.data {
-                let (_, lctx) = ctx.text_contexts();
+                let lctx = &mut self.layouts;
                 let fctx = &mut self.fonts;
-                self.editor
-                    .driver(fctx, lctx)
-                    .select_from_accesskit(selection);
+                if let (Some(anchor), Some(focus)) = (
+                    self.accessibility.byte_index(&selection.anchor),
+                    self.accessibility.byte_index(&selection.focus),
+                ) {
+                    self.editor
+                        .driver(fctx, lctx)
+                        .select_byte_range(anchor, focus);
+                }
                 let new_generation = self.editor.generation();
                 if new_generation != self.rendered_generation {
                     ctx.request_layout();

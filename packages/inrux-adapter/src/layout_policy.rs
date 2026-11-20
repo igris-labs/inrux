@@ -6,7 +6,13 @@ use inrux_style::{Align, Display, FlexDirection, Justify, Size};
 
 use taffy::prelude as tf;
 /// Translate logical sizing into the shared Taffy layout representation.
-fn dimension(size: Option<Size>) -> tf::Dimension {
+fn dimension<
+    T: taffy::style_helpers::TaffyAuto
+        + taffy::style_helpers::FromLength
+        + taffy::style_helpers::FromPercent,
+>(
+    size: Option<Size>,
+) -> T {
     match size {
         Some(Size::Px(n)) => tf::length(n),
         Some(Size::Percent(n)) => tf::percent(n / 100.0),
@@ -136,20 +142,24 @@ fn build(
             width: dimension(style.max_width),
             height: dimension(style.max_height),
         },
-        align_items: style.align_items.map(|value| match value {
-            Align::Start => tf::AlignItems::FlexStart,
-            Align::Center => tf::AlignItems::Center,
-            Align::End => tf::AlignItems::FlexEnd,
-            Align::Stretch => tf::AlignItems::Stretch,
-        }),
-        justify_content: style.justify_content.map(|value| match value {
-            Justify::Start => tf::JustifyContent::FlexStart,
-            Justify::Center => tf::JustifyContent::Center,
-            Justify::End => tf::JustifyContent::FlexEnd,
-            Justify::SpaceBetween => tf::JustifyContent::SpaceBetween,
-            Justify::SpaceAround => tf::JustifyContent::SpaceAround,
-            Justify::SpaceEvenly => tf::JustifyContent::SpaceEvenly,
-        }),
+        align_items: style
+            .align_items
+            .map_or(tf::AlignItems::STRETCH, |value| match value {
+                Align::Start => tf::AlignItems::FLEX_START,
+                Align::Center => tf::AlignItems::CENTER,
+                Align::End => tf::AlignItems::FLEX_END,
+                Align::Stretch => tf::AlignItems::STRETCH,
+            }),
+        justify_content: style
+            .justify_content
+            .map_or(tf::JustifyContent::FLEX_START, |value| match value {
+                Justify::Start => tf::JustifyContent::FLEX_START,
+                Justify::Center => tf::JustifyContent::CENTER,
+                Justify::End => tf::JustifyContent::FLEX_END,
+                Justify::SpaceBetween => tf::JustifyContent::SPACE_BETWEEN,
+                Justify::SpaceAround => tf::JustifyContent::SPACE_AROUND,
+                Justify::SpaceEvenly => tf::JustifyContent::SPACE_EVENLY,
+            }),
         flex_wrap: if style.wrap.unwrap_or(false) {
             tf::FlexWrap::Wrap
         } else {
@@ -201,9 +211,8 @@ fn build(
     let id = if container {
         let mut native_children = children.iter().map(|child| child.id).collect::<Vec<_>>();
         if native_children.is_empty() && style.aspect_ratio.is_some() {
-            // Taffy 0.9 classifies empty containers as leaves; its leaf ratio path can override
-            // explicit/max heights. A zero-size private child selects the container algorithm.
-            // It has no framework identity, paint, event target or published geometry entry.
+            // Empty ratio containers need flex sizing to preserve explicit/max heights.
+            // A private zero-size child selects that algorithm without adding a public node.
             native_children.push(tree.new_leaf(tf::Style {
                 size: tf::Size {
                     width: tf::length(0.0_f32),

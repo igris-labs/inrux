@@ -1,14 +1,14 @@
 //! Device-scale shared glyph surfaces uploaded through Vello's native image primitive.
 use masonry::{
     kurbo::Affine,
-    parley::Layout,
     peniko::{Blob, ImageAlphaType, ImageData, ImageFormat},
     vello::Scene,
 };
+use parley::Layout;
 use std::{cell::RefCell, collections::HashMap, sync::Arc};
 thread_local! { static IMAGES: RefCell<HashMap<u64, ImageData>> = RefCell::new(HashMap::new()); }
 /// Paint one immutable layout while preserving the editor's native clip, caret and selection transform.
-pub(crate) fn paint_layout<B: masonry::parley::Brush>(
+pub(crate) fn paint_layout<B: parley::Brush>(
     scene: &mut Scene,
     transform: Affine,
     layout: &Layout<B>,

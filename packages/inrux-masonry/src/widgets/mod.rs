@@ -14,3 +14,6 @@ pub(crate) mod property;
 
 pub(crate) mod label;
 pub(crate) mod text_image;
+
+mod text_accessibility;
+mod text_styles;

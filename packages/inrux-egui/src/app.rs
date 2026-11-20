@@ -16,7 +16,8 @@ struct NativeApp<S: Component> {
 }
 impl<S: Component> eframe::App for NativeApp<S> {
     /// Consume the latest description and paint it on the native main thread.
-    fn update(&mut self, context: &egui::Context, _: &mut eframe::Frame) {
+    fn ui(&mut self, root: &mut egui::Ui, _: &mut eframe::Frame) {
+        let context = root.ctx().clone();
         match self.session.take_frame() {
             Ok(Some(frame)) => self.frame = Some(frame),
             Ok(None) => {}
@@ -29,15 +30,15 @@ impl<S: Component> eframe::App for NativeApp<S> {
             }
             egui::Window::new("Inrux Inspector")
                 .open(&mut self.inspector)
-                .show(context, |ui| {
+                .show(&context, |ui| {
                     if let Some(frame) = &self.frame {
                         inrux_devtools::inspect(frame, ui);
                     }
                 });
         }
         egui::CentralPanel::default()
-            .frame(egui::Frame::NONE.fill(context.style().visuals.panel_fill))
-            .show(context, |ui| {
+            .frame(egui::Frame::NONE.fill(root.visuals().panel_fill))
+            .show(root, |ui| {
                 self.session
                     .viewport()
                     .set(ui.available_width(), ui.available_height());

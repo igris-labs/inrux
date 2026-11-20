@@ -12,8 +12,9 @@ pub(crate) fn observe(context: &egui::Context) {
     });
     if let Some(keyboard) = keyboard {
         context.data_mut(|data| {
-            let source = data
-                .get_temp_mut_or_default::<FocusVisibility>(egui::Id::new("inrux-focus-visible"));
+            let source = data.get_temp_mut_or_default::<FocusVisibility>(egui::Id::unique(
+                "inrux-focus-visible",
+            ));
             if keyboard {
                 source.keyboard();
             } else {
@@ -25,7 +26,7 @@ pub(crate) fn observe(context: &egui::Context) {
 /// Retain pointer focus for Enter/Space; only its outline is suppressed.
 pub(crate) fn visible(context: &egui::Context) -> bool {
     context.data(|data| {
-        data.get_temp::<FocusVisibility>(egui::Id::new("inrux-focus-visible"))
+        data.get_temp::<FocusVisibility>(egui::Id::unique("inrux-focus-visible"))
             .unwrap_or_default()
             .visible()
     })

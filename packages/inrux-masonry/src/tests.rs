@@ -226,7 +226,7 @@ fn secondary_click_does_not_activate_checkbox() {
 /// The native placeholder must inherit the same font family and size on its very first frame.
 #[test]
 fn placeholder_inherits_typography_on_initial_mount() {
-    use masonry::parley::StyleProperty;
+    use parley::StyleProperty;
     let node = Node::input("".into(), "Name".into(), inrux_core::Emit::new(|_| Ok(())))
         .styled(Style::new().font_family("Noto Sans").font_size(24.0));
     let (mut harness, _) = harness(&node);
@@ -238,7 +238,7 @@ fn placeholder_inherits_typography_on_initial_mount() {
         Label::retain_styles(&mut label.downcast::<Label>(), |property| {
             match property {
                 StyleProperty::FontSize(value) => size = Some(*value),
-                StyleProperty::FontStack(value) => family = Some(value.clone()),
+                StyleProperty::FontFamily(value) => family = Some(value.clone()),
                 _ => {}
             }
             true

@@ -91,3 +91,7 @@ Switch, determinate Progress and bounded Meter share portable descriptors and wo
 All application text now uses the [common text provider](../inrux-text/README.md), including control labels, placeholders and editors. Native input/focus/clipboard/IME integration remains in this binding. [Typography integration](../../docs/content/2.internals/03.text-rendering.md) explains fractional metrics, glyph uploads, cache budgets and validation limits. Register application fonts before mounting; retain intrinsic family names in styles.
 
 For advanced embedding through `render` / `render_ref`, call `inrux_egui::configure_fonts(&context, &font_assets)` on the rendering thread first. It configures both the shared font registry and egui's editor metadata; setting raw egui `FontDefinitions` alone does not register assets with the common provider. Ordinary Inrux windows configure fonts automatically.
+
+## Dependency baseline
+
+The host uses egui/eframe 0.37 and the `App::ui` lifecycle, requiring Rust 1.98 or newer. Clipboard support is an explicit eframe feature. Native text input uses the current structured IME preedit event and shared text geometry. Headless tests clear texture upload deltas after inspecting frames; a real renderer must apply those deltas. See [dependency maintenance](../../docs/content/6.tooling/05.dependencies.md).

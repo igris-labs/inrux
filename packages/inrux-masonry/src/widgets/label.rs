@@ -5,9 +5,10 @@
 
 use std::any::TypeId;
 
+use crate::widgets::text_accessibility::LayoutAccessibility;
+use crate::widgets::text_styles::{StyleProperty, StyleSet, default_text_styles};
 use masonry::accesskit::{Node, NodeId, Role};
 use masonry::core::{HasProperty, NoAction};
-use masonry::parley::LayoutAccessibility;
 use masonry::vello::Scene;
 use masonry::vello::kurbo::{Affine, Point, Size};
 use masonry::vello::peniko::BlendMode;
@@ -15,11 +16,9 @@ use tracing::{Span, trace_span};
 
 use masonry::core::{
     AccessCtx, ArcStr, BoxConstraints, BrushIndex, ChildrenIds, LayoutCtx, PaintCtx, PropertiesMut,
-    PropertiesRef, RegisterCtx, StyleProperty, StyleSet, Update, UpdateCtx, Widget, WidgetId,
-    WidgetMut,
+    PropertiesRef, RegisterCtx, Update, UpdateCtx, Widget, WidgetId, WidgetMut,
 };
 use masonry::properties::{ContentColor, DisabledContentColor, LineBreaking, Padding};
-use masonry::theme::default_text_styles;
 
 use masonry::theme;
 
@@ -187,8 +186,8 @@ impl Widget for Label {
         for property in self.styles.inner().values() {
             match property {
                 StyleProperty::FontSize(value) => size = *value,
-                StyleProperty::FontStack(masonry::parley::FontStack::Single(
-                    masonry::parley::FontFamily::Named(name),
+                StyleProperty::FontFamily(parley::FontFamily::Single(
+                    parley::FontFamilyName::Named(name),
                 )) => family = Some(name.as_ref()),
                 _ => {}
             }

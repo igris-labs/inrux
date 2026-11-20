@@ -19,3 +19,6 @@ mod widgets;
 mod services;
 
 mod viewport;
+
+#[cfg(test)]
+mod test_support;

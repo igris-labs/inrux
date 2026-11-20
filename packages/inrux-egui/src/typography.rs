@@ -50,14 +50,14 @@ pub(crate) fn layout(
                     };
                     glyph.line_height = here[3];
                     glyph.font_height = here[3];
-                    glyph.font_impl_height = here[3];
+                    glyph.font_face_height = here[3];
                     glyph.font_ascent = line.metrics().baseline - row_top;
-                    glyph.font_impl_ascent = glyph.font_ascent;
+                    glyph.font_face_ascent = glyph.font_ascent;
                     row.glyphs.push(glyph);
                 }
             }
             row.size = egui::vec2(line.metrics().advance, line.metrics().line_height);
-            row.ends_with_newline = ends_with_newline;
+            placed.ends_with_newline = ends_with_newline;
             row.visuals = Default::default();
             placed.pos = egui::pos2(0.0, row_top);
             row_top += line.metrics().line_height;
@@ -189,7 +189,7 @@ mod tests {
     fn editor_metadata_matches_shared_utf8_geometry() {
         let context = egui::Context::default();
         let text = "Rust café 🦀";
-        let _ = context.run(egui::RawInput::default(), |context| {
+        let _ = crate::test_support::frame(&context, egui::RawInput::default(), |context| {
             egui::CentralPanel::default().show(context, |ui| {
                 let galley = layout(
                     ui,
@@ -239,21 +239,27 @@ mod tests {
         );
         let primary = ttf_parser::Face::parse(&asset.data, 0).unwrap();
         let defaults = egui::FontDefinitions::default();
-        let glyph = ['😀', '🦀', '🚀', '🙂', '❤', '☆']
-            .into_iter()
-            .find(|ch| {
-                primary.glyph_index(*ch).is_none()
-                    && defaults.font_data.values().any(|data| {
-                        ttf_parser::Face::parse(&data.font, data.index)
-                            .unwrap()
-                            .glyph_index(*ch)
-                            .is_some()
-                    })
-            })
-            .expect("expected a glyph supplied only by a bundled host fallback");
+        let mut glyph = None;
+        for name in &defaults.families[&egui::FontFamily::Proportional] {
+            let data = &defaults.font_data[name];
+            let face = ttf_parser::Face::parse(data.font.as_ref().as_ref(), data.index).unwrap();
+            for table in face.tables().cmap.unwrap().subtables {
+                table.codepoints(|code| {
+                    if glyph.is_none()
+                        && let Some(ch) = char::from_u32(code)
+                        && !ch.is_control()
+                        && primary.glyph_index(ch).is_none()
+                        && face.glyph_index(ch).is_some()
+                    {
+                        glyph = Some(ch);
+                    }
+                });
+            }
+        }
+        let glyph = glyph.expect("expected a glyph supplied only by a bundled host fallback");
         let context = egui::Context::default();
         context.set_fonts(definitions(&[asset]).unwrap());
-        let _ = context.run(egui::RawInput::default(), |context| {
+        let _ = crate::test_support::frame(&context, egui::RawInput::default(), |context| {
             assert!(context.fonts_mut(|fonts| fonts.has_glyph(
                 &egui::FontId::new(15.0, egui::FontFamily::Name("Noto Sans".into())),
                 glyph

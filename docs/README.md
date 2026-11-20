@@ -49,3 +49,7 @@ Static output is `docs/.output/public/`. Serve it with a static host. Use `pnpm 
 The default public origin is `https://inrux.igrislabs.com`. Canonical URLs, Open Graph assets, robots metadata and the sitemap use that origin. Set `NUXT_SITE_URL` before building only when you need a different preview/deployment origin. The current site assumes deployment at the origin root. A URL-prefix deployment needs its asset paths and route base configured and tested first.
 
 No deployment runs during development. Documentation code is MIT; bundled fonts retain the [SIL Open Font License](public/fonts/NotoSans-OFL.txt). Keep the matching Mono notice too. See [project notices](../THIRD_PARTY_NOTICES.md).
+
+## Dependency maintenance
+
+See [current versions and migration notes](content/6.tooling/05.dependencies.md). The site aligns Nuxt Content across its app and layer to keep generated collection types consistent. TypeScript remains at 6.0.3 for Vue typechecking; the extension has its own TypeScript 7 toolchain.

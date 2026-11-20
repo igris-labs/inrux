@@ -2,12 +2,13 @@
 name = "inrux-text"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [dependencies]
 inrux-style.workspace = true
-parley = "=0.6.0"
+parley.workspace = true
 swash = "=0.2.10"
 
 [lints]

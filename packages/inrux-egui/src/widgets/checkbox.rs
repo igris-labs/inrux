@@ -25,7 +25,7 @@ pub(crate) fn paint(
         })
         .inner;
     response.widget_info(|| {
-        egui::WidgetInfo::selected(egui::WidgetType::Checkbox, !node.disabled, *checked, label)
+        egui::WidgetInfo::selected(egui::Role::CheckBox, !node.disabled, *checked, label)
     });
     ui.ctx()
         .data_mut(|data| data.insert_temp(visual.path.with("widget-id"), response.id));

@@ -21,7 +21,7 @@ fn taffy_applies_padding_gap_and_row_layout() {
 fn headless_frame_renders_all_widget_types() {
     let context = egui::Context::default();
     let mut called = false;
-    let _ = context.run(egui::RawInput::default(), |context| {
+    let _ = crate::test_support::frame(&context, egui::RawInput::default(), |context| {
         egui::CentralPanel::default().show(context, |ui| {
             let event = Emit::new(|_: String| Ok(()));
             let node = Node::column(vec![
@@ -43,7 +43,7 @@ fn headless_frame_renders_all_widget_types() {
 #[test]
 fn border_width_alone_paints_using_the_current_text_color() {
     let context = egui::Context::default();
-    let output = context.run(egui::RawInput::default(), |context| {
+    let output = crate::test_support::frame(&context, egui::RawInput::default(), |context| {
         egui::CentralPanel::default().show(context, |ui| {
             let node = Node::column(vec![]).styled(
                 Style::new()
@@ -70,7 +70,8 @@ fn disabling_a_focused_editor_rejects_text_and_accepts_external_reset() {
     let mut node = Node::input("original".into(), "Name".into(), callback)
         .styled(Style::new().width(Size::Px(240.0)).height(Size::Px(44.0)));
     let frame = |node: &Node, events: Vec<egui::Event>| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -116,7 +117,7 @@ fn disabling_a_focused_editor_rejects_text_and_accepts_external_reset() {
 #[test]
 fn unknown_font_returns_a_diagnostic_before_native_layout_or_paint() {
     let context = egui::Context::default();
-    let _ = context.run(egui::RawInput::default(), |context| {
+    let _ = crate::test_support::frame(&context, egui::RawInput::default(), |context| {
         egui::CentralPanel::default().show(context, |ui| {
             let node = Node::text("Hello".into()).styled(
                 Style::new()
@@ -143,7 +144,8 @@ fn button_hover_changes_paint_without_recoloring_disabled_controls() {
     use inrux_style::Color;
     let context = egui::Context::default();
     let frame = |disabled, position| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events: vec![egui::Event::PointerMoved(position)],
                 ..Default::default()
@@ -187,7 +189,8 @@ fn button_hover_changes_paint_without_recoloring_disabled_controls() {
 fn checkbox_focus_paints_only_a_compact_square_indicator() {
     let context = egui::Context::default();
     let frame = |events| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -268,7 +271,8 @@ fn viewport_wheel_clips_and_reveals_native_button() {
     .styled(Style::new().width(Size::Px(200.0)).height(Size::Px(100.0)));
     let context = egui::Context::default();
     let frame = |events| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(
                     egui::Pos2::ZERO,
@@ -307,6 +311,8 @@ fn viewport_wheel_clips_and_reveals_native_button() {
     frame(vec![
         egui::Event::PointerMoved(egui::pos2(30.0, 50.0)),
         egui::Event::MouseWheel {
+            phase: egui::TouchPhase::Move,
+            source: egui::MouseWheelSource::Unknown,
             unit: egui::MouseWheelUnit::Point,
             delta: egui::vec2(0.0, -1000.0),
             modifiers: egui::Modifiers::NONE,
@@ -341,7 +347,8 @@ fn nested_viewports_route_wheel_to_the_deepest_movable_target() {
         ));
     let context = egui::Context::default();
     let frame = |events| {
-        let _ = context.run(
+        let _ = crate::test_support::frame(
+            &context,
             egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(
                     egui::Pos2::ZERO,
@@ -363,6 +370,8 @@ fn nested_viewports_route_wheel_to_the_deepest_movable_target() {
         vec![
             egui::Event::PointerMoved(egui::pos2(30.0, 40.0)),
             egui::Event::MouseWheel {
+                phase: egui::TouchPhase::Move,
+                source: egui::MouseWheelSource::Unknown,
                 unit: egui::MouseWheelUnit::Point,
                 delta: egui::vec2(0.0, y),
                 modifiers: egui::Modifiers::NONE,
@@ -400,7 +409,8 @@ fn viewport_focus_keyboard_and_drag_use_the_same_state() {
     ));
     let context = egui::Context::default();
     let frame = |events, focus| {
-        let _ = context.run(
+        let _ = crate::test_support::frame(
+            &context,
             egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(
                     egui::Pos2::ZERO,
@@ -411,7 +421,9 @@ fn viewport_focus_keyboard_and_drag_use_the_same_state() {
             },
             |ctx| {
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    let root = ui.id().with(("inrux-root", &node.key, &node.generation));
+                    let root = ui
+                        .scope_id()
+                        .with(("inrux-root", &node.key, &node.generation));
                     if focus == 1 {
                         ui.memory_mut(|m| m.request_focus(root.with(("index", 1_usize))));
                     }
@@ -432,6 +444,8 @@ fn viewport_focus_keyboard_and_drag_use_the_same_state() {
         vec![
             egui::Event::PointerMoved(egui::pos2(40.0, 50.0)),
             egui::Event::MouseWheel {
+                phase: egui::TouchPhase::Move,
+                source: egui::MouseWheelSource::Unknown,
                 unit: egui::MouseWheelUnit::Point,
                 delta: egui::vec2(0.0, 40.0),
                 modifiers: egui::Modifiers::NONE,
@@ -480,7 +494,8 @@ fn long_input_reveals_caret_inside_fixed_width() {
     let node = Node::input(String::new(), "Name".into(), Emit::new(|_| Ok(())))
         .styled(Style::new().width(Size::Px(140.0)).height(Size::Px(40.0)));
     let frame = |events| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(
                     egui::Pos2::ZERO,
@@ -551,6 +566,8 @@ fn long_input_reveals_caret_inside_fixed_width() {
         frame(vec![
             egui::Event::PointerMoved(pos),
             egui::Event::MouseWheel {
+                phase: egui::TouchPhase::Move,
+                source: egui::MouseWheelSource::Unknown,
                 unit: egui::MouseWheelUnit::Point,
                 delta: egui::vec2(5.0, 0.0),
                 modifiers: egui::Modifiers::NONE,
@@ -580,6 +597,8 @@ fn long_input_reveals_caret_inside_fixed_width() {
     );
     for _ in 0..8 {
         frame(vec![egui::Event::MouseWheel {
+            phase: egui::TouchPhase::Move,
+            source: egui::MouseWheelSource::Unknown,
             unit: egui::MouseWheelUnit::Point,
             delta: egui::vec2(-5.0, 0.0),
             modifiers: egui::Modifiers::NONE,
@@ -615,7 +634,8 @@ fn coarse_wheel_is_smoothed_and_settles_without_losing_distance() {
     ));
     let context = egui::Context::default();
     let frame = |events| {
-        let _ = context.run(
+        let _ = crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -632,6 +652,8 @@ fn coarse_wheel_is_smoothed_and_settles_without_losing_distance() {
     frame(vec![
         egui::Event::PointerMoved(egui::pos2(30.0, 40.0)),
         egui::Event::MouseWheel {
+            phase: egui::TouchPhase::Move,
+            source: egui::MouseWheelSource::Unknown,
             unit: egui::MouseWheelUnit::Point,
             delta: egui::vec2(0.0, -120.0),
             modifiers: egui::Modifiers::NONE,
@@ -644,6 +666,8 @@ fn coarse_wheel_is_smoothed_and_settles_without_losing_distance() {
     }
     assert!((received.try_iter().last().unwrap() - 120.0).abs() < 0.1);
     frame(vec![egui::Event::MouseWheel {
+        phase: egui::TouchPhase::Move,
+        source: egui::MouseWheelSource::Unknown,
         unit: egui::MouseWheelUnit::Point,
         delta: egui::vec2(0.0, -3.0),
         modifiers: egui::Modifiers::NONE,
@@ -668,7 +692,8 @@ fn native_editing_modes_handle_paste_enter_and_wrapping() {
         }
         .styled(Style::new().width(Size::Px(180.0)).height(Size::Px(100.0)));
         let frame = |events| {
-            context.run(
+            crate::test_support::frame(
+                &context,
                 egui::RawInput {
                     screen_rect: Some(egui::Rect::from_min_size(
                         egui::Pos2::ZERO,
@@ -747,7 +772,8 @@ fn button_pointer_activation_has_no_outline_and_keyboard_activation_restores_it(
     );
     let context = egui::Context::default();
     let frame = |events| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -805,7 +831,8 @@ fn switch_pointer_keyboard_and_disabled_state_work_with_semantic_accessibility()
     let context = egui::Context::default();
     context.enable_accesskit();
     let frame = |events| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -870,7 +897,7 @@ fn switch_pointer_keyboard_and_disabled_state_work_with_semantic_accessibility()
 fn ranges_expose_numeric_values_and_distinct_native_accessibility_roles() {
     let context = egui::Context::default();
     context.enable_accesskit();
-    let output = context.run(Default::default(), |context| {
+    let output = crate::test_support::frame(&context, Default::default(), |context| {
         egui::CentralPanel::default().show(context, |ui| {
             render(
                 Node::column(vec![
@@ -906,7 +933,8 @@ fn headless_switch_parts_paint_custom_geometry_and_hover() {
         .class("choice",&parse_css(".choice::part(track) {width:48px;height:28px;background:#112233;border-radius:9px;} .choice::part(thumb) {width:20px;height:20px;background:#ddeeff;} .choice::part(track):hover {background:#778899;}").unwrap())
         .styled(Style::new().width(Size::Px(200.0)));
     let frame = |events| {
-        context.run(
+        crate::test_support::frame(
+            &context,
             egui::RawInput {
                 events,
                 ..Default::default()
@@ -932,7 +960,7 @@ fn headless_switch_parts_paint_custom_geometry_and_hover() {
 fn native_button_alpha_is_preserved_and_painted_once() {
     let context = egui::Context::default();
     let fill = inrux_style::Color::rgba(20, 40, 200, 128);
-    let output = context.run(egui::RawInput::default(), |context| {
+    let output = crate::test_support::frame(&context, egui::RawInput::default(), |context| {
         egui::CentralPanel::default().show(context, |ui| {
             let node = Node::button("Alpha".into(), None)
                 .styled(Style::new().width(Size::Px(120.0)).background(fill));

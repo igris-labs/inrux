@@ -176,6 +176,7 @@ impl VisitMut for Resolver<'_> {
                 Stmt::Item(Item::Use(item)) => {
                     let file = syn::File {
                         shebang: None,
+                        frontmatter: None,
                         attrs: vec![],
                         items: vec![Item::Use(item.clone())],
                     };
@@ -220,9 +221,7 @@ impl VisitMut for Resolver<'_> {
         for arm in &mut expression.arms {
             let before = self.locals.clone();
             names(&arm.pat, &mut self.locals);
-            if let Some((_, guard)) = &mut arm.guard {
-                self.visit_expr_mut(guard);
-            }
+            self.visit_pat_mut(&mut arm.pat);
             self.visit_expr_mut(&mut arm.body);
             self.locals = before;
         }
@@ -328,6 +327,7 @@ fn names(pattern: &Pat, output: &mut BTreeSet<String>) {
                 names(value, output);
             }
         }
+        Pat::Guard(value) => names(&value.pat, output),
         Pat::Reference(value) => names(&value.pat, output),
         Pat::Type(value) => names(&value.pat, output),
         Pat::Paren(value) => names(&value.pat, output),

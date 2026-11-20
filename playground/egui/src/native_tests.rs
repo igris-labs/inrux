@@ -49,7 +49,8 @@ impl Native {
     }
     /// Render at the actual minimum window size with native text measurement and input handling.
     fn frame(&self, events: Vec<Event>) -> egui::FullOutput {
-        self.context.run(
+        headless_frame(
+            &self.context,
             egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(
                     egui::Pos2::ZERO,
@@ -95,6 +96,8 @@ impl Native {
                 self.frame(vec![
                     Event::PointerMoved(hover),
                     Event::MouseWheel {
+                        phase: egui::TouchPhase::Move,
+                        source: egui::MouseWheelSource::Unknown,
                         unit: egui::MouseWheelUnit::Point,
                         delta: egui::vec2(0.0, delta),
                         modifiers: Modifiers::NONE,
@@ -359,7 +362,7 @@ fn native_code_font_uses_monospace_advances() {
             .font_family("Noto Sans Mono")
             .font_size(13.0),
     );
-    let output = app.context.run(egui::RawInput::default(), |context| {
+    let output = headless_frame(&app.context, egui::RawInput::default(), |context| {
         egui::CentralPanel::default().show(context, |ui| {
             inrux_egui::render(node.clone(), ui).unwrap();
         });
@@ -407,4 +410,14 @@ fn native_switch_and_range_catalogue_pages_render_and_update() {
         });
         app.frame(vec![]);
     }
+}
+
+fn headless_frame(
+    context: &egui::Context,
+    input: egui::RawInput,
+    render: impl FnMut(&mut egui::Ui),
+) -> egui::FullOutput {
+    let mut output = context.run_ui(input, render);
+    output.textures_delta.clear();
+    output
 }

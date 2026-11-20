@@ -89,3 +89,7 @@ Wheel and viewport keyboard movement use native composition translations, retain
 ## Shared typography
 
 All application text now uses the [common text provider](../inrux-text/README.md), including control labels, placeholders and editors. Native input/focus/clipboard/IME integration remains in this binding. [Typography integration](../../docs/content/2.internals/03.text-rendering.md) explains fractional metrics, glyph uploads, cache budgets and validation limits. Register application fonts before mounting; retain intrinsic family names in styles.
+
+## Current text integration
+
+The private editor and label use the current shared Parley 0.13 API, with an adapter-owned layout context and style types. `widgets/text_accessibility.rs` owns accessible runs, stable IDs and selection mapping after Parley removed its AccessKit helpers. Masonry still brings its own older Parley internally. The Naga 26 feature-alignment declarations follow Masonry/Vello shader dependencies and remain necessary for combined-engine builds. See [dependency maintenance](../../docs/content/6.tooling/05.dependencies.md).

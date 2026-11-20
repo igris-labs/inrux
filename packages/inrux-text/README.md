@@ -33,3 +33,7 @@ cargo test -p inrux-text --release shared_text_cache_timing --locked -- --ignore
 ```
 
 It measures provider work, excluding native upload and presentation. See [framework integration and limits](../../docs/content/2.internals/03.text-rendering.md). Shared glyph pixels do not guarantee identical compositor output on every platform, and native editor IME/accessibility integration still requires platform testing.
+
+## Dependency baseline
+
+The shared provider uses Parley 0.13 with complex-script shaping enabled and Swash 0.2.10. The Masonry editor bridge imports this Parley version directly and owns its layout context; Masonry 0.4 may still use Parley 0.6 internally. Public provider layouts and cloned font contexts use the current version, with no legacy-version conversion API. See [dependency maintenance](../../docs/content/6.tooling/05.dependencies.md).

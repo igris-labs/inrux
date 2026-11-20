@@ -1,6 +1,6 @@
 //! Exact logical metrics and cluster geometry shared by layout, paint and editor bridges.
 use super::*;
-use parley::{Cursor, FontFamily, FontStack, Layout, LineHeight, StyleProperty};
+use parley::{Cursor, FontFamily, Layout, LineHeight, StyleProperty};
 /// Immutable text layout. Native handles and display scale never enter logical geometry.
 pub struct Shaped {
     /// Stable identity used by private texture caches.
@@ -68,9 +68,7 @@ pub fn shape(text: &str, size: f32, family: Option<&str>, width: f32) -> Arc<Sha
         let mut builder = context
             .layouts
             .ranged_builder(&mut context.fonts, text, 1.0, false);
-        builder.push_default(StyleProperty::FontStack(FontStack::Single(
-            FontFamily::Named(family.into()),
-        )));
+        builder.push_default(StyleProperty::FontFamily(FontFamily::named(family)));
         builder.push_default(StyleProperty::FontSize(size));
         builder.push_default(StyleProperty::LineHeight(LineHeight::FontSizeRelative(
             LINE_HEIGHT,

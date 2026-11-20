@@ -27,7 +27,7 @@ pub(crate) fn paint(
         ink.to_srgba_unmultiplied(),
         region,
     ) {
-        let id = egui::Id::new("inrux-shared-text-textures");
+        let id = egui::Id::unique("inrux-shared-text-textures");
         let existing = ui.ctx().data_mut(|data| {
             data.get_temp_mut_or_default::<std::collections::HashMap<u64, egui::TextureHandle>>(id)
                 .get(&bitmap.id)

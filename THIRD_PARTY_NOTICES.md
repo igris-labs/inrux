@@ -5,6 +5,7 @@ Original Inrux code is licensed under the [MIT license](LICENSE). This does not 
 ## Adapted Apache-2.0 source
 
 - **Masonry 0.4.0:** private input/text-area and label code in `packages/inrux-masonry/src/widgets/`, adapted from the Xilem/Druid authors. Copyright headers remain in the source. See [the adapter NOTICE](packages/inrux-masonry/NOTICE).
+- **Parley text accessibility:** `packages/inrux-masonry/src/widgets/text_accessibility.rs` adapts the Parley 0.6.0 AccessKit bridge for the current Parley layout API. Copyright 2021 the Parley Authors; Apache-2.0 OR MIT. See [the adapter NOTICE](packages/inrux-masonry/NOTICE).
 - **GPUI 0.2.2:** private input code in `packages/inrux-gpui/src/widgets/input/`, adapted from Zed's input example, Copyright Zed Industries, Inc. See [the adapter NOTICE](packages/inrux-gpui/NOTICE).
 
 The [Apache-2.0 text](licenses/Apache-2.0.txt) is retained for these adaptations. These two crates use `MIT AND Apache-2.0` package metadata to describe mixed contents; this is not a dual-license offer for the project. Original Inrux files remain MIT; Apache-marked adaptations retain Apache-2.0.

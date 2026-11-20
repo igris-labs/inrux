@@ -42,21 +42,15 @@ pub(crate) fn paint(
         .data_mut(|data| data.get_temp::<Editor>(path))
         .unwrap_or_else(|| Editor::new(value, event.applied()));
     editor.reconcile(value, event.applied());
+    let enabled = ui.is_enabled() && !node.disabled;
+    if !enabled {
+        ui.memory_mut(|memory| memory.surrender_focus(path));
+    }
     if ui.memory(|memory| memory.has_focus(path)) {
         // Normalize before native editing computes cursor/selection positions.
         ui.input_mut(|input| {
             for event in &mut input.events {
-                let text = match event {
-                    egui::Event::Paste(text)
-                    | egui::Event::Text(text)
-                    | egui::Event::Ime(
-                        egui::ImeEvent::Preedit(text) | egui::ImeEvent::Commit(text),
-                    ) => Some(text),
-                    _ => None,
-                };
-                if let Some(text) = text {
-                    *text = inrux_components::normalize_text(text, *multiline).into_owned();
-                }
+                normalize_event(event, *multiline);
             }
         });
     }
@@ -96,15 +90,15 @@ pub(crate) fn paint(
             ui.scope_builder(egui::UiBuilder::new().max_rect(inner), |ui| {
                 ui.set_clip_rect(ui.clip_rect().intersect(inner));
                 let salt = path.with("text-scroll");
-                let id = ui.make_persistent_id(egui::Id::new(salt));
+                let id = ui.make_persistent_id(egui::IdSalt::new(salt));
                 let extent =
                     crate::typography::layout(ui, &editor.value, font.clone(), ink, f32::INFINITY)
                         .size()
                         .x;
-                if !*multiline {
-                    pan_text(ui, inner, id, extent);
-                }
-                let scrolling = (if *multiline {
+                let pan = (!*multiline)
+                    .then(|| pan_text(ui, inner, id, extent))
+                    .flatten();
+                let area = (if *multiline {
                     egui::ScrollArea::vertical()
                 } else {
                     egui::ScrollArea::horizontal()
@@ -117,8 +111,13 @@ pub(crate) fn paint(
                 .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
                 .auto_shrink([false, false])
                 .animated(false)
-                .max_height(inner.height())
-                .show(ui, |ui| {
+                .max_height(inner.height());
+                let area = if let Some(offset) = pan {
+                    area.horizontal_scroll_offset(offset)
+                } else {
+                    area
+                };
+                let scrolling = area.show(ui, |ui| {
                     // add_sized centers oversized widgets, shifting the text/caret by
                     // half its overflow. Let the native editor allocate its full content.
                     let navigation = ui.input(|input| {
@@ -144,18 +143,19 @@ pub(crate) fn paint(
                         egui::TextEdit::singleline(&mut editor.value)
                     };
                     let output = edit
+                        .interactive(enabled)
                         .id(path)
-                        .frame(false)
+                        .frame(egui::Frame::NONE)
                         .clip_text(false)
                         .desired_width(inner.width())
                         .margin(egui::Vec2::ZERO)
                         .font(font.clone())
                         .layouter(&mut layouter)
                         .text_color(ink)
-                        .vertical_align(if *multiline {
-                            egui::Align::Min
+                        .align(if *multiline {
+                            egui::Align2::LEFT_TOP
                         } else {
-                            egui::Align::Center
+                            egui::Align2::LEFT_CENTER
                         })
                         .min_size(inner.size())
                         .show(ui);
@@ -216,7 +216,7 @@ pub(crate) fn paint(
             .inner
         })
         .inner;
-    if response.changed() {
+    if enabled && response.changed() {
         let revision = editor.edited();
         emit_result = event.emit(revision, editor.value.clone());
         if emit_result.is_err() {
@@ -229,20 +229,69 @@ pub(crate) fn paint(
 }
 
 /// Pan only the horizontal gesture; vertical wheel input must reach the containing viewport.
-fn pan_text(ui: &mut egui::Ui, rect: egui::Rect, id: egui::Id, extent: f32) {
+fn pan_text(ui: &mut egui::Ui, rect: egui::Rect, id: egui::Id, extent: f32) -> Option<f32> {
     if !ui.is_enabled() || !ui.rect_contains_pointer(rect) {
-        return;
+        return None;
     }
     let delta = ui.input(|input| input.smooth_scroll_delta.x);
     if delta == 0.0 {
-        return;
+        return None;
     }
-    let mut state = egui::scroll_area::State::load(ui.ctx(), id).unwrap_or_default();
-    let offset = (state.offset.x - delta).clamp(0.0, (extent - rect.width()).max(0.0));
-    if offset != state.offset.x {
-        state.offset.x = offset;
-        state.store(ui.ctx(), id);
-        ui.input_mut(|input| input.smooth_scroll_delta.x = 0.0);
-        ui.ctx().request_repaint();
+    let state = egui::scroll_area::State::load(ui.ctx(), id).unwrap_or_default();
+    let current = state.clamped_offset().x;
+    let offset = (current - delta).clamp(0.0, (extent - rect.width()).max(0.0));
+    if offset == current {
+        return None;
+    }
+    ui.input_mut(|input| input.smooth_scroll_delta.x -= current - offset);
+    ui.ctx().request_repaint();
+    Some(offset)
+}
+
+/// Keep IME character ranges aligned when normalization collapses CRLF pairs.
+fn normalize_event(event: &mut egui::Event, multiline: bool) {
+    if let egui::Event::Ime(egui::ImeEvent::Preedit {
+        text,
+        active_range_chars,
+    }) = event
+    {
+        let normalized = inrux_components::normalize_text(text, multiline);
+        if let std::borrow::Cow::Owned(normalized) = normalized {
+            if let Some(range) = active_range_chars {
+                let mapped = |index| {
+                    let bytes = text.chars().take(index).map(char::len_utf8).sum::<usize>();
+                    inrux_components::normalize_text(&text[..bytes], multiline)
+                        .chars()
+                        .count()
+                };
+                *range = mapped(range.start)..mapped(range.end);
+            }
+            *text = normalized;
+        }
+    } else if let egui::Event::Paste(text)
+    | egui::Event::Text(text)
+    | egui::Event::Ime(egui::ImeEvent::Commit(text)) = event
+    {
+        *text = inrux_components::normalize_text(text, multiline).into_owned();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn preedit_selection_tracks_normalized_unicode_characters() {
+        let mut event = egui::Event::Ime(egui::ImeEvent::Preedit {
+            text: "é\r\n🦀".into(),
+            active_range_chars: Some(3..4),
+        });
+        normalize_event(&mut event, false);
+        assert_eq!(
+            event,
+            egui::Event::Ime(egui::ImeEvent::Preedit {
+                text: "é 🦀".into(),
+                active_range_chars: Some(2..3),
+            })
+        );
     }
 }

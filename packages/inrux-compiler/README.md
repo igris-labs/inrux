@@ -95,3 +95,5 @@ The compiler generates `setup() -> State`, or `setup(props: Props) -> State` for
 Use `<rust explicit>` for an authored State/setup pair. The explicit block requires State and a setup function and accepts module items only. A manual setup function in plain `<rust>` produces a diagnostic asking for `<rust explicit>`. An advanced component may keep an explicit State declaration and end its top-level initialization with a State value. Combining a user-written setup function with top-level initialization is an error. Retained names must be unique and `props` is reserved.
 
 View bindings can use retained names directly, including `counter.count` from a composable. This works in both `<rust>` and `<rust explicit>`. Complete direct bindings read Signal/Computed values automatically; Rust handlers still use explicit state parameters.
+
+The compiler uses syn 3 and prettyplease 0.3. Match guards are patterns in this syntax tree; binding resolution preserves guard-local names while resolving component fields. Rust block scanning uses ra-ap-rustc_lexer 0.185.

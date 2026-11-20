@@ -1,9 +1,9 @@
 //! Text shaping and content-color translation, owned by the Masonry boundary.
 use crate::widgets::label::Label;
+use crate::widgets::text_styles::StyleProperty;
 use inrux_style::{Color, Style};
 use masonry::{
     core::{Properties, WidgetMut},
-    parley::StyleProperty,
     peniko::color::AlphaColor,
     properties::{ContentColor, DisabledContentColor},
 };
@@ -14,9 +14,9 @@ pub(crate) fn color(value: Color) -> AlphaColor<masonry::peniko::color::Srgb> {
 /// Create text using the resolved inherited font size.
 pub(crate) fn label(text: &str, style: &Style) -> Label {
     Label::new(text.to_owned())
-        .with_style(StyleProperty::FontStack(resolved_family(style)))
+        .with_style(StyleProperty::FontFamily(resolved_family(style)))
         .with_style(StyleProperty::LineHeight(
-            masonry::parley::LineHeight::FontSizeRelative(inrux_adapter::controls::LINE_HEIGHT),
+            parley::LineHeight::FontSizeRelative(inrux_adapter::controls::LINE_HEIGHT),
         ))
         .with_style(StyleProperty::FontSize(style.font_size.unwrap_or(15.0)))
 }
@@ -43,13 +43,13 @@ pub(crate) fn update(
     if previous.is_none() {
         Label::insert_style(
             label,
-            StyleProperty::LineHeight(masonry::parley::LineHeight::FontSizeRelative(
+            StyleProperty::LineHeight(parley::LineHeight::FontSizeRelative(
                 inrux_adapter::controls::LINE_HEIGHT,
             )),
         );
     }
     if previous.is_none_or(|old| old.font_family != style.font_family) {
-        Label::insert_style(label, StyleProperty::FontStack(resolved_family(style)));
+        Label::insert_style(label, StyleProperty::FontFamily(resolved_family(style)));
     }
     if previous.is_none_or(|old| old.font_size.unwrap_or(15.0) != style.font_size.unwrap_or(15.0)) {
         Label::insert_style(
@@ -70,12 +70,12 @@ pub(crate) fn update(
 }
 
 /// Own a named family so retained native text does not borrow a render description.
-pub(crate) fn family(name: &str) -> masonry::parley::FontStack<'static> {
-    masonry::parley::FontStack::Single(masonry::parley::FontFamily::Named(name.to_owned().into()))
+pub(crate) fn family(name: &str) -> parley::FontFamily<'static> {
+    parley::FontFamily::named(name).into_owned()
 }
 
 /// Removing an authored family restores the native default instead of retaining stale typography.
-pub(crate) fn resolved_family(style: &Style) -> masonry::parley::FontStack<'static> {
+pub(crate) fn resolved_family(style: &Style) -> parley::FontFamily<'static> {
     family(
         style
             .font_family

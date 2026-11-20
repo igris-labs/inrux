@@ -7,24 +7,25 @@ mod events;
 mod rendering;
 use std::any::TypeId;
 
+use crate::widgets::text_accessibility::LayoutAccessibility;
+use crate::widgets::text_styles::{StyleProperty, default_text_styles};
 use masonry::accesskit::{Node, NodeId, Role};
-use masonry::parley::PlainEditor;
-use masonry::parley::editor::{Generation, SplitString};
 use masonry::vello::Scene;
 use masonry::vello::kurbo::{Affine, Point, Rect, Size};
 use masonry::vello::peniko::Fill;
+use parley::PlainEditor;
+use parley::{Generation, SplitString};
 
 use masonry::core::keyboard::{Key, KeyState, NamedKey};
 use masonry::core::{
     AccessCtx, AccessEvent, BoxConstraints, BrushIndex, ChildrenIds, CursorIcon, EventCtx, Ime,
     LayoutCtx, PaintCtx, PointerButton, PointerButtonEvent, PointerEvent, PointerUpdate,
-    PropertiesMut, PropertiesRef, QueryCtx, RegisterCtx, StyleProperty, TextEvent, Update,
-    UpdateCtx, Widget, WidgetId, WidgetMut,
+    PropertiesMut, PropertiesRef, QueryCtx, RegisterCtx, TextEvent, Update, UpdateCtx, Widget,
+    WidgetId, WidgetMut,
 };
 use masonry::properties::{
     CaretColor, ContentColor, DisabledContentColor, SelectionColor, UnfocusedSelectionColor,
 };
-use masonry::theme::default_text_styles;
 use masonry::util::debug_panic;
 use masonry::{accesskit, theme};
 
@@ -48,7 +49,9 @@ use masonry::{accesskit, theme};
 pub struct TextArea<const USER_EDITABLE: bool> {
     /// The underlying `PlainEditor`, which provides a high-level interface for us to dispatch into.
     editor: PlainEditor<BrushIndex>,
-    fonts: masonry::parley::FontContext,
+    fonts: parley::FontContext,
+    layouts: parley::LayoutContext<BrushIndex>,
+    accessibility: LayoutAccessibility,
     viewport: inrux_adapter::editing::TextViewport,
     vertical: inrux_adapter::editing::TextViewport,
     /// The generation of `editor` which we have rendered.
@@ -110,6 +113,8 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
         Self {
             editor,
             fonts: inrux_text::font_context(),
+            layouts: parley::LayoutContext::new(),
+            accessibility: LayoutAccessibility::default(),
             viewport: Default::default(),
             vertical: Default::default(),
             rendered_generation: Generation::default(),
@@ -139,14 +144,14 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
     /// Set a style property for the new text area.
     ///
     /// Style properties set by this method include [text size](parley::StyleProperty::FontSize),
-    /// [font family](parley::StyleProperty::FontStack), [font weight](parley::StyleProperty::FontWeight),
+    /// [font family](parley::StyleProperty::FontFamily), [font weight](parley::StyleProperty::FontWeight),
     /// and [variable font parameters](parley::StyleProperty::FontVariations).
     /// The styles inserted here apply to the entire text; we currently do not
     /// support inline rich text.
     ///
     /// Setting [`StyleProperty::Brush`](parley::StyleProperty::Brush) is not supported.
     /// Use [`ContentColor`] and [`DisabledContentColor`] properties instead.
-    /// This is also not additive for [font stacks](parley::StyleProperty::FontStack), and
+    /// This is also not additive for [font stacks](parley::StyleProperty::FontFamily), and
     /// instead overwrites any previous font stack.
     ///
     /// To set a style property on an active text area, use [`insert_style`](Self::insert_style).
@@ -241,14 +246,14 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
     /// Set font styling for an active text area.
     ///
     /// Style properties set by this method include [text size](parley::StyleProperty::FontSize),
-    /// [font family](parley::StyleProperty::FontStack), [font weight](parley::StyleProperty::FontWeight),
+    /// [font family](parley::StyleProperty::FontFamily), [font weight](parley::StyleProperty::FontWeight),
     /// and [variable font parameters](parley::StyleProperty::FontVariations).
     /// The styles inserted here apply to the entire text; we currently do not
     /// support inline rich text.
     ///
     /// Setting [`StyleProperty::Brush`](parley::StyleProperty::Brush) is not supported.
     /// Use [`ContentColor`] and [`DisabledContentColor`] properties instead.
-    /// This is also not additive for [font stacks](parley::StyleProperty::FontStack), and
+    /// This is also not additive for [font stacks](parley::StyleProperty::FontFamily), and
     /// instead overwrites any previous font stack.
     ///
     /// This is the runtime equivalent of [`with_style`](Self::with_style).
@@ -272,13 +277,13 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
         // disruptive, but we've warned about that. The platform's state is not reset, and the
         // preedit will show up again when the platform updates it.
         if this.widget.editor.is_composing() {
-            let (_, lctx) = this.ctx.text_contexts();
+            let lctx = &mut this.widget.layouts;
             let fctx = &mut this.widget.fonts;
             this.widget.editor.driver(fctx, lctx).clear_compose();
         }
         this.widget.editor.set_text(new_text);
 
-        let (_, lctx) = this.ctx.text_contexts();
+        let lctx = &mut this.widget.layouts;
         let fctx = &mut this.widget.fonts;
         this.widget.editor.driver(fctx, lctx).move_to_text_end();
 
@@ -290,7 +295,7 @@ impl<const EDITABLE: bool> TextArea<EDITABLE> {
     /// No-op if either index is not a char boundary.
     #[cfg(test)]
     pub fn select_byte_range(this: &mut WidgetMut<'_, Self>, start: usize, end: usize) {
-        let (_, lctx) = this.ctx.text_contexts();
+        let lctx = &mut this.widget.layouts;
         let fctx = &mut this.widget.fonts;
         this.widget
             .editor

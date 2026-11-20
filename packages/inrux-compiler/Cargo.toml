@@ -2,6 +2,7 @@
 name = "inrux-compiler"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
@@ -10,9 +11,9 @@ inrux-style.workspace = true
 syn = { workspace = true, features = ["visit-mut"] }
 quote.workspace = true
 proc-macro2 = { workspace = true, features = ["span-locations"] }
-prettyplease = "0.2"
+prettyplease = "0.3"
 unicode-width = "0.2"
-rust-lexer = { package = "ra-ap-rustc_lexer", version = "0.183" }
+rust-lexer = { package = "ra-ap-rustc_lexer", version = "0.185" }
 serde_json = "1"
 
 [lints]

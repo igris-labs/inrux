@@ -84,3 +84,7 @@ The host test launches an isolated VS Code profile and temporary Cargo fixture w
 Implicit `<rust>` initialization is projected into the generated Cargo module, including typed state declarations and generated field navigation. Rebuild once after updating the compiler. Embedded Rust requests require a syntactically valid Rust block; framework syntax diagnostics remain available while editing incomplete code.
 
 Both `<rust>` (automatic setup) and `<rust explicit>` (manual State/setup) support formatting, Rust highlighting and Cargo-aware navigation. The closing tag is `</rust>` for both forms.
+
+## Toolchain baseline
+
+The client uses TypeScript 7 and vscode-languageclient 11. Compile with `npm ci` and `npm run compile`; the TypeScript configuration uses Node16 module resolution and explicit Node/VS Code ambient types. The language client writes to a VS Code logging output channel. The docs site retains its separate TypeScript 6 toolchain for Vue checking.

@@ -70,7 +70,7 @@ pub fn underline_rects<B: Brush>(
                 .items()
                 .find_map(|item| match item {
                     PositionedLayoutItem::GlyphRun(glyphs) => {
-                        Some(glyphs.run().metrics().underline_offset)
+                        Some(glyphs.run().font_metrics().underline_offset)
                     }
                     _ => None,
                 })
